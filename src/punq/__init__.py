@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 import typing
 
 class MissingDependencyException (Exception):
@@ -9,23 +9,26 @@ class InvalidRegistrationException (Exception):
     pass
 
 
-class Container:
+Registration = namedtuple('Registration', ['service', 'builder', 'args'])
+
+
+class Registry:
 
     def __init__(self):
-        self.registrations = defaultdict(list)
+        self.__registrations = defaultdict(list)
 
     def register_service_and_impl(self, service, impl, resolve_args):
-        self.registrations[service].append((impl, resolve_args))
+        self.__registrations[service].append((impl, resolve_args))
 
     def register_service_and_instance(self, service, instance):
-        self.registrations[service].append(((lambda: instance), {}))
+        self.__registrations[service].append(((lambda: instance), {}))
 
     def register_concrete_service(self, service):
         if not callable(service):
             raise InvalidRegistrationException(
                     "The service %s can't be registered as its own implementation" %
                     (repr(service)))
-        self.registrations[service].append((service, {}))
+        self.__registrations[service].append((service, {}))
 
     def register(self, service, factory=None, resolve_args=None):
         resolve_args = resolve_args or {}
@@ -36,6 +39,17 @@ class Container:
         else:
             self.register_service_and_instance(service, factory)
 
+    def __getitem__(self, service):
+        return self.__registrations[service]
+
+
+class Container:
+
+    def __init__(self):
+        self.registrations = Registry()
+
+    def register(self, service, factory=None, resolve_args=None):
+        self.registrations.register(service, factory, resolve_args)
 
     def resolve_all(self, service):
         return [
