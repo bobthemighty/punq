@@ -193,3 +193,17 @@ class When_registering_a_service_and_providing_an_argument:
 
     def it_should_have_passed_the_static_argument(self):
         expect(self.instance.connection_string).to(equal("Hello world"))
+
+
+
+class When_we_provide_an_argument_at_resolution_time:
+
+    def given_a_container(self):
+        self.container = Container()
+        self.container.register(MessageWriter, TmpFileMessageWriter)
+
+    def because_we_resolve_with_an_argument(self):
+        self.instance = self.container.resolve(MessageWriter, path='foo')
+
+    def it_should_have_instantiated_the_instance_correctly(self):
+        expect(self.instance.path).to(equal('foo'))

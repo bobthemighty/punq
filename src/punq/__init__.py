@@ -77,7 +77,7 @@ class Container:
             self.build_impl(x) for x in self.registrations[service]
         ]
 
-    def build_impl(self, registration):
+    def build_impl(self, registration, resolution_args=None):
         args = {
             k: self.resolve(v)
             for k, v in registration.needs.items()
@@ -85,13 +85,14 @@ class Container:
 
         }
         args.update(registration.args)
+        args.update(resolution_args or {})
 
         return registration.builder(**args)
 
-    def resolve(self, service_key):
+    def resolve(self, service_key, **kwargs):
         impls = self.registrations[service_key]
         if len(impls) == 0:
             raise MissingDependencyException()
 
         registration = impls[-1]
-        return self.build_impl(registration)
+        return self.build_impl(registration, kwargs)
