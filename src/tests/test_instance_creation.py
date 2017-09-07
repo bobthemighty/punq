@@ -1,5 +1,6 @@
 from expects import expect, be_a, equal, be, have_len
 from punq import Container, MissingDependencyException, InvalidRegistrationException
+from typing import Callable, NewType
 
 class MessageWriter:
 
@@ -26,6 +27,18 @@ class TmpFileMessageWriter(MessageWriter):
         with open(self.path) as f:
             f.write(msg)
 
+
+ConnectionStringFactory = NewType(
+        'ConnectionStringFactory',
+        Callable[[], str])
+
+class FancyDbMessageWriter(MessageWriter):
+
+    def __init__(self, cstr: ConnectionStringFactory) -> None:
+        self.connection_string = cstr()
+
+    def write(self, msg):
+        pass
 
 class HelloWorldSpeaker(MessageSpeaker):
 
@@ -162,3 +175,21 @@ class When_registering_the_same_service_multiple_times:
 
         expect(impls[0]).to(be_a(StdoutMessageWriter))
         expect(impls[1]).to(be_a(TmpFileMessageWriter))
+
+
+class When_registering_a_service_and_providing_an_argument:
+
+    def given_a_container(self):
+        self.container = Container()
+        self.container.register(MessageWriter, FancyDbMessageWriter, {
+            'cstr': lambda: "Hello world"
+        })
+
+    def because_we_resolve_an_instance(self):
+        self.instance = self.container.resolve(MessageWriter)
+
+    def it_should_build_the_instance(self):
+        expect(self.instance).to(be_a(FancyDbMessageWriter))
+
+    def it_should_have_passed_the_static_argument(self):
+        expect(self.instance.connection_string).to(equal("Hello world"))
