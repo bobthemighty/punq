@@ -1,4 +1,4 @@
-from expects import expect, be_a, equal, be
+from expects import expect, be_a, equal, be, have_len
 from punq import Container, MissingDependencyException, InvalidRegistrationException
 
 class MessageWriter:
@@ -142,4 +142,23 @@ class When_registering_a_concrete_service_as_a_singleton:
         expect(self.error).to(be_a(InvalidRegistrationException))
 
 
+class When_registering_the_same_service_multiple_times:
 
+    def given_a_container(self):
+        self.container = Container()
+
+    def because_we_register_two_writers(self):
+        self.container.register(MessageWriter, StdoutMessageWriter)
+        self.container.register(MessageWriter, TmpFileMessageWriter('my-file'))
+
+    def it_should_resolve_the_latest_registration(self):
+        expect(self.container.resolve(MessageWriter)).to(be_a(TmpFileMessageWriter))
+
+    def it_should_allow_me_to_resolve_all_implementations(self):
+        expect(self.container.resolve_all(MessageWriter)).to(have_len(2))
+
+    def it_should_return_the_implementations_in_registration_order(self):
+        impls = self.container.resolve_all(MessageWriter)
+
+        expect(impls[0]).to(be_a(StdoutMessageWriter))
+        expect(impls[1]).to(be_a(TmpFileMessageWriter))
