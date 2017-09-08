@@ -22,6 +22,25 @@ class Registry:
         return sig
 
     def register_service_and_impl(self, service, impl, resolve_args):
+        """Registers a concrete implementation of an abstract service.
+
+           Examples:
+                In this example, the EmailSender type is an abstract class
+                and SmtpEmailSender is our concrete implementation.
+
+                >>> class EmailSender:
+                ...     def send(self, msg):
+                ...         pass
+                ...
+                >>> class SmtpEmailSender (EmailSender):
+                ...     def send(self, msg):
+                ...         print("Sending message via smtp")
+                ...
+                >>> container.register(EmailSender, SmtpSender)
+                >>> instance = container.resolve(EmailSender)
+                >>> instance.send("Hello")
+                >>> Sending message via smtp
+        """
         self.__registrations[service].append(Registration(
             service,
             impl,
@@ -77,7 +96,10 @@ class Container:
             self.build_impl(x) for x in self.registrations[service]
         ]
 
-    def build_impl(self, registration, resolution_args=None):
+    def _build_impl(self, registration, resolution_args=None):
+        """Instantiate the registered service.
+        """
+
         args = {
             k: self.resolve(v)
             for k, v in registration.needs.items()
