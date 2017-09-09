@@ -1,6 +1,6 @@
 from expects import expect, be_a, equal, be, have_len
 from punq import Container, MissingDependencyException, InvalidRegistrationException
-from typing import Callable, NewType
+from typing import Callable, List, NewType
 
 class MessageWriter:
 
@@ -155,6 +155,23 @@ class When_registering_a_concrete_service_as_a_singleton:
         expect(self.error).to(be_a(InvalidRegistrationException))
 
 
+class When_registering_an_arbitrary_callable_as_a_concrete_implementation:
+    """Concrete registrations need to take a callable type,
+       not just a callable, otherwise we've no way to construct the service key"""
+
+    def given_a_container(self):
+        self.container = Container()
+
+    def because_we_register_a_lambda_as_concrete(self):
+        try:
+            self.container.register(lambda: 5)
+        except Exception as e:
+            self.error = e
+
+    def it_should_have_raised_InvalidRegistration(self):
+        expect(self.error).to(be_a(InvalidRegistrationException))
+
+
 class When_registering_the_same_service_multiple_times:
 
     def given_a_container(self):
@@ -181,9 +198,7 @@ class When_registering_a_service_and_providing_an_argument:
 
     def given_a_container(self):
         self.container = Container()
-        self.container.register(MessageWriter, FancyDbMessageWriter, {
-            'cstr': lambda: "Hello world"
-        })
+        self.container.register(MessageWriter, FancyDbMessageWriter, cstr=lambda: "Hello world")
 
     def because_we_resolve_an_instance(self):
         self.instance = self.container.resolve(MessageWriter)
@@ -207,3 +222,24 @@ class When_we_provide_an_argument_at_resolution_time:
 
     def it_should_have_instantiated_the_instance_correctly(self):
         expect(self.instance.path).to(equal('foo'))
+
+
+class When_we_need_to_resolve_a_list_of_dependencies:
+
+    class BroadcastSpeaker:
+
+        def __init__(self, writers: List[MessageWriter]) -> None:
+            self.writers = writers
+
+
+    def given_a_container(self):
+        self.container = Container()
+        self.container.register(MessageWriter, StdoutMessageWriter)
+        self.container.register(MessageWriter, TmpFileMessageWriter, path='my-file')
+        self.container.register(MessageSpeaker, self.BroadcastSpeaker)
+
+    def because_we_depend_on_a_list_of_registered_dependencies(self):
+        self.instance = self.container.resolve(MessageSpeaker)
+
+    def it_should_inject_all_the_registered_dependencies(self):
+        expect(self.instance.writers).to(have_len(2))

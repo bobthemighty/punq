@@ -1,6 +1,7 @@
 from collections import defaultdict, namedtuple
 import typing
 
+
 class MissingDependencyException (Exception):
     pass
 
@@ -48,6 +49,23 @@ class Registry:
             resolve_args))
 
     def register_service_and_instance(self, service, instance):
+        """Register a singleton instance to implement a service.
+
+        Examples:
+            If we have an object that is expensive to construct, or that
+            wraps a resouce that must not be shared, we might choose to
+            use a singleton instance.
+
+            >>> class DataAccessLayer:
+            ...     pass
+            ...
+            >>> class SqlAlchemyDataAccessLayer (DataAccessLayer):
+            ...     def __init__(self, engine:SqlAlchemy.Engine):
+            ...         pass
+            ...
+            >>> container.register(
+            ...     DataAccessLayer,
+            ...     SqlAlchemyDataAccessLayer(create_engine(db_uri)))"""
         self.__registrations[service].append(Registration(
             service,
             lambda: instance,
@@ -55,7 +73,20 @@ class Registry:
             {}))
 
     def register_concrete_service(self, service):
-        if not callable(service):
+        """ Register a service as its own implementation.
+
+            Examples:
+                If we need to register a dependency, but we don't need to
+                abstract it, we can register it as concrete.
+
+                >>> class FileReader:
+                ...     def read (self):
+                ...         # Assorted legerdemain and rigmarole
+                ...         pass
+                ...
+                >>> container.register(FileReader)"""
+
+        if not type(service) is type:
             raise InvalidRegistrationException(
                     "The service %s can't be registered as its own implementation" %
                     (repr(service)))
@@ -65,15 +96,14 @@ class Registry:
             self._get_needs_for_ctor(service),
             {}))
 
-
-    def register(self, service, factory=None, resolve_args=None):
-        resolve_args = resolve_args or {}
-        if factory is None:
+    def register(self, service, _factory=None, **kwargs):
+        resolve_args = kwargs or {}
+        if _factory is None:
             self.register_concrete_service(service)
-        elif callable(factory):
-            self.register_service_and_impl(service, factory, resolve_args)
+        elif callable(_factory):
+            self.register_service_and_impl(service, _factory, resolve_args)
         else:
-            self.register_service_and_instance(service, factory)
+            self.register_service_and_instance(service, _factory)
 
     def __getitem__(self, service):
         return self.__registrations[service]
@@ -88,12 +118,12 @@ class Container:
     def __init__(self):
         self.registrations = Registry()
 
-    def register(self, service, factory=None, resolve_args=None):
-        self.registrations.register(service, factory, resolve_args)
+    def register(self, service, _factory=None, **kwargs):
+        self.registrations.register(service, _factory, **kwargs)
 
-    def resolve_all(self, service):
+    def resolve_all(self, service, **kwargs):
         return [
-            self.build_impl(x) for x in self.registrations[service]
+            self._build_impl(x, kwargs) for x in self.registrations[service]
         ]
 
     def _build_impl(self, registration, resolution_args=None):
@@ -111,10 +141,21 @@ class Container:
 
         return registration.builder(**args)
 
+    def _get_generic_type_var(self, service):
+        try:
+            if service.__origin__ == typing.List:
+                return service.__args__[0]
+        except AttributeError as e:
+            return None
+
     def resolve(self, service_key, **kwargs):
         impls = self.registrations[service_key]
         if len(impls) == 0:
-            raise MissingDependencyException()
+            generic_list_service = self._get_generic_type_var(service_key)
+            if generic_list_service is None:
+                raise MissingDependencyException(
+                        'Failed to resolve implementation for '+str(service_key))
+            return self.resolve_all(generic_list_service)
 
         registration = impls[-1]
-        return self.build_impl(registration, kwargs)
+        return self._build_impl(registration, kwargs)
