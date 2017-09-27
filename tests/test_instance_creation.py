@@ -243,3 +243,65 @@ class When_we_need_to_resolve_a_list_of_dependencies:
 
     def it_should_inject_all_the_registered_dependencies(self):
         expect(self.instance.writers).to(have_len(2))
+
+
+class Filter:
+    pass
+
+
+class Is_A (Filter):
+    def __init__(self, next:Filter, spy):
+        self.spy = spy
+        self.next = next
+
+    def match(self, input):
+        self.spy.append('is_a')
+        return input == 'A' or self.next.match(input)
+
+class Is_B (Filter):
+    def __init__(self, next:Filter, spy):
+        self.spy = spy
+        self.next = next
+
+    def match(self, input):
+        self.spy.append('is_b')
+        return input == 'B' or self.next.match(input)
+
+class Is_C (Filter):
+    def __init__(self, next:Filter, spy):
+        self.spy = spy
+        self.next = next
+
+    def match(self, input):
+        self.spy.append('is_c')
+        return input == 'C' or self.next.match(input)
+
+class NullFilter (Filter):
+    def __init__(self, spy):
+        self.spy = spy
+
+    def match(self, input):
+        self.spy.append('null')
+        return False
+
+
+
+
+class When_we_need_to_resolve_a_chain_of_collaborators:
+
+
+    def given_a_container(self):
+        self.spy = []
+        self.container = Container()
+        self.container.register(Filter, NullFilter, spy=self.spy)
+        self.container.register(Filter, Is_C, spy=self.spy)
+        self.container.register(Filter, Is_B, spy=self.spy)
+        self.container.register(Filter, Is_A, spy=self.spy)
+
+    def because_we_resolve_an_instance_of_the_chain(self):
+        self.filter = self.container.resolve(Filter)
+        self.filter.match('D')
+
+    def it_should_call_each_element_in_turn(self):
+        expect(self.spy).to(equal(['is_a', 'is_b', 'is_c', 'null']))
+

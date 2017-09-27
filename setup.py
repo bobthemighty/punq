@@ -15,22 +15,25 @@ def read(*filenames, **kwargs):
 
 
 long_description = read('README.rst', 'CHANGES.md')
-requirements_test = read('requirements-test.txt').split('\n')
 
 setup(
     name='punq',
-    version='0.0.1',
-    url='http://github.com/madedotcom/photon-pump/',
+    version='0.1.0',
+    url='http://github.com/bobthemighty/punq',
     license='MIT',
     author='Bob Gregory',
-    tests_require=requirements_test,
+    tests_require=[
+        'colorama==0.3.9',
+        'Contexts==0.11.2',
+        'expects==0.8.0'
+    ],
     author_email='bob@codefiend.co.uk',
     description='Unintrusive dependency injection for Python 3.6 +',
     long_description=long_description,
     packages=['punq'],
+    package_data={'punq': ['CHANGES.md']},
     include_package_data=True,
     platforms='any',
-    test_suite='photonpump.test',
     classifiers=[
         'Programming Language :: Python',
         'Development Status :: 3 - Alpha',
