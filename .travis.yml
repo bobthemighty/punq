@@ -1,0 +1,18 @@
+dist: xenial
+language: python
+python:
+- 3.6
+- 3.7
+script:
+- make travis
+after_success:
+- codecov
+deploy:
+  provider: pypi
+  password:
+    secure: XOyq2ZlY9OIwUEI4aJK/lG1CRDcd12XahLCAda5uUEODEB+hYpyr9zLGDHCLSIu/jU0jhbKbRyhIM5056TM8d29XLpq7pXTDMDwUxEc9rY37cC+OvO8MoocMAkzfvdQ8vaNMe3xrW49vGApMNm8Er+aZvMhqThfjjA/mIaDxjyajt+d0pN7Ow8IaGur8vPzvhaNZuS/bYiwhAHXEEUBIk6xLB1nPkk1FnVIXETjM1c28Sas9ki95gvgWWkMwtGXmn/T6waf0zOtdAC66lJZL5nwj1MTjw1uhZYB+/QhIlPzPSyvDD9sIqJnEEOlT5eUKGV2yp+Eo3qjN7fPIKmhB5ydtIvz/96why0Gobc6BIrOROYT1kn/NTi3R5FCZDQ4+xQPd6po+Pu8COqSRhSJWltAWgnNR1JmUnPVj0rEQaJzi/gqmGQ1Y4TQ0/KsjbYuU7p+mzpcGKh+y1fiPFYRTvrRlBeZbx38vJ8g0rpNtSGi2DkDNl2vCEl4ZMhKnO2AY9TSX9ziIpmPxCN6wo6aIhkmOPIu6QEWv6MVl5pHDIRnm6MhEZ6RL50FeN4jRCrE6ORi0xuAb02tBUAl25teKwiuQ771jcvdsE48+gySBVffHfuO+tdC0+9JPf96uwVemCh5eHxj7wyEFAR1e00NnqY8tGaGroeQ3VkeZxSu/irc=
+user: bobthemighty
+true:
+  tags: true
+  distributions: sdist
+  repo: bobthemighty/punq

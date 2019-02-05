@@ -1,27 +1,39 @@
-import itertools
-from collections import defaultdict, namedtuple
+import sys
 import typing
-import logging
+from collections import defaultdict, namedtuple
+from pkg_resources import DistributionNotFound, get_distribution
+
+if sys.version_info >= (3, 7, 0):
+    from .py_37 import is_generic_list
+else:
+    from .py_36 import is_generic_list
 
 
-class MissingDependencyException (Exception):
+try:
+    __version__ = get_distribution(__name__).version
+except DistributionNotFound:
+    # package is not installed
     pass
 
 
-class InvalidRegistrationException (Exception):
+class MissingDependencyException(Exception):
     pass
 
 
-Registration = namedtuple('Registration', ['service', 'builder', 'needs', 'args'])
+class InvalidRegistrationException(Exception):
+    pass
+
+
+Registration = namedtuple("Registration", ["service", "builder", "needs", "args"])
 
 
 class Registry:
-
     def __init__(self):
         self.__registrations = defaultdict(list)
 
     def _get_needs_for_ctor(self, cls):
         sig = typing.get_type_hints(cls.__init__)
+
         return sig
 
     def register_service_and_impl(self, service, impl, resolve_args):
@@ -44,11 +56,9 @@ class Registry:
                 >>> instance.send("Hello")
                 >>> Sending message via smtp
         """
-        self.__registrations[service].append(Registration(
-            service,
-            impl,
-            self._get_needs_for_ctor(impl),
-            resolve_args))
+        self.__registrations[service].append(
+            Registration(service, impl, self._get_needs_for_ctor(impl), resolve_args)
+        )
 
     def register_service_and_instance(self, service, instance):
         """Register a singleton instance to implement a service.
@@ -68,11 +78,9 @@ class Registry:
             >>> container.register(
             ...     DataAccessLayer,
             ...     SqlAlchemyDataAccessLayer(create_engine(db_uri)))"""
-        self.__registrations[service].append(Registration(
-            service,
-            lambda: instance,
-            {},
-            {}))
+        self.__registrations[service].append(
+            Registration(service, lambda: instance, {}, {})
+        )
 
     def register_concrete_service(self, service):
         """ Register a service as its own implementation.
@@ -90,23 +98,25 @@ class Registry:
 
         if not type(service) is type:
             raise InvalidRegistrationException(
-                    "The service %s can't be registered as its own implementation" %
-                    (repr(service)))
-        self.__registrations[service].append(Registration(
-            service,
-            service,
-            self._get_needs_for_ctor(service),
-            {}))
+                "The service %s can't be registered as its own implementation"
+                % (repr(service))
+            )
+        self.__registrations[service].append(
+            Registration(service, service, self._get_needs_for_ctor(service), {})
+        )
 
     def build_context(self, key, existing=None):
         if existing is None:
             return ResolutionContext(key, list(self.__getitem__(key)))
+
         if key not in existing.targets:
             existing.targets[key] = ResolutionTarget(key, list(self.__getitem__(key)))
+
         return existing
 
     def register(self, service, _factory=None, **kwargs):
         resolve_args = kwargs or {}
+
         if _factory is None:
             self.register_concrete_service(service)
         elif callable(_factory):
@@ -123,17 +133,12 @@ class Registry:
 
 
 class ResolutionTarget:
-
     def __init__(self, key, impls):
         self.service = key
         self.impls = impls
 
     def is_generic_list(self):
-        try:
-            if self.service.__origin__ == typing.List:
-                return self.service.__args__[0]
-        except AttributeError as e:
-            return None
+        return is_generic_list(self.service)
 
     @property
     def generic_parameter(self):
@@ -145,7 +150,6 @@ class ResolutionTarget:
 
 
 class ResolutionContext:
-
     def __init__(self, key, impls):
         self.targets = {key: ResolutionTarget(key, impls)}
         self.cache = {}
@@ -168,7 +172,6 @@ class ResolutionContext:
 
 
 class Container:
-
     def __init__(self):
         self.registrations = Registry()
 
@@ -177,8 +180,10 @@ class Container:
 
     def resolve_all(self, service, **kwargs):
         context = self.registrations.build_context(service)
+
         return [
-            self._build_impl(x, kwargs, context) for x in context.all_registrations(service)
+            self._build_impl(x, kwargs, context)
+            for x in context.all_registrations(service)
         ]
 
     def _build_impl(self, registration, resolution_args, context):
@@ -188,35 +193,40 @@ class Container:
         args = {
             k: self._resolve_impl(v, resolution_args, context)
             for k, v in registration.needs.items()
-            if k != 'return' and k not in registration.args
-
+            if k != "return" and k not in registration.args
         }
         args.update(registration.args)
         args.update(resolution_args or {})
         result = registration.builder(**args)
         context[registration.service] = result
+
         return result
 
     def _resolve_impl(self, service_key, kwargs, context):
 
         context = self.registrations.build_context(service_key, context)
+
         if context.has_cached(service_key):
             return context[service_key]
 
         target = context.target(service_key)
+
         if target.is_generic_list():
             return self.resolve_all(target.generic_parameter)
 
         registration = target.next_impl()
+
         if registration is None:
             raise MissingDependencyException(
-                'Failed to resolve implementation for '+str(service_key))
+                "Failed to resolve implementation for " + str(service_key)
+            )
 
         if service_key in registration.needs.values():
             self._resolve_impl(service_key, kwargs, context)
-        return self._build_impl(registration, kwargs, context)
 
+        return self._build_impl(registration, kwargs, context)
 
     def resolve(self, service_key, **kwargs):
         context = self.registrations.build_context(service_key)
+
         return self._resolve_impl(service_key, kwargs, context)

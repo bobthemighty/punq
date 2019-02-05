@@ -2,24 +2,23 @@ from expects import expect, be_a, equal, be, have_len
 from punq import Container, MissingDependencyException, InvalidRegistrationException
 from typing import Callable, List, NewType
 
-class MessageWriter:
 
+class MessageWriter:
     def write(self, msg: str) -> None:
         pass
 
-class MessageSpeaker:
 
+class MessageSpeaker:
     def speak(self):
         pass
 
-class StdoutMessageWriter(MessageWriter):
 
+class StdoutMessageWriter(MessageWriter):
     def write(self, msg: str) -> None:
         print(msg)
 
 
 class TmpFileMessageWriter(MessageWriter):
-
     def __init__(self, path):
         self.path = path
 
@@ -28,20 +27,18 @@ class TmpFileMessageWriter(MessageWriter):
             f.write(msg)
 
 
-ConnectionStringFactory = NewType(
-        'ConnectionStringFactory',
-        Callable[[], str])
+ConnectionStringFactory = NewType("ConnectionStringFactory", Callable[[], str])
+
 
 class FancyDbMessageWriter(MessageWriter):
-
     def __init__(self, cstr: ConnectionStringFactory) -> None:
         self.connection_string = cstr()
 
     def write(self, msg):
         pass
 
-class HelloWorldSpeaker(MessageSpeaker):
 
+class HelloWorldSpeaker(MessageSpeaker):
     def __init__(self, writer: MessageWriter) -> None:
         self.writer = writer
 
@@ -50,7 +47,6 @@ class HelloWorldSpeaker(MessageSpeaker):
 
 
 class When_creating_instances_with_no_dependencies:
-
     def given_a_container(self):
         self.container = Container()
         self.container.register(MessageWriter, StdoutMessageWriter)
@@ -63,7 +59,6 @@ class When_creating_instances_with_no_dependencies:
 
 
 class When_creating_instances_with_dependencies:
-
     def given_a_container(self):
         self.container = Container()
         self.container.register(MessageWriter, StdoutMessageWriter)
@@ -80,7 +75,6 @@ class When_creating_instances_with_dependencies:
 
 
 class When_a_dependency_is_missing:
-
     def given_a_container(self):
         self.container = Container()
         self.container.register(MessageSpeaker, HelloWorldSpeaker)
@@ -96,7 +90,6 @@ class When_a_dependency_is_missing:
 
 
 class When_registering_a_service_with_no_implementor:
-
     def given_a_container(self):
         self.container = Container()
 
@@ -106,11 +99,11 @@ class When_registering_a_service_with_no_implementor:
 
     def it_should_register_as_its_own_implementor(self):
         expect(self.container.resolve(StdoutMessageWriter)).to(
-                be_a(StdoutMessageWriter))
+            be_a(StdoutMessageWriter)
+        )
 
 
 class When_registering_a_service_with_a_custom_factory:
-
     def given_a_container(self):
         self.container = Container()
 
@@ -126,10 +119,9 @@ class When_registering_a_service_with_a_custom_factory:
 
 
 class When_registering_a_service_with_a_singleton_instance:
-
     def given_a_container_with_a_singleton_registration(self):
         self.container = Container()
-        self.writer = TmpFileMessageWriter('/tmp/my-file')
+        self.writer = TmpFileMessageWriter("/tmp/my-file")
         self.container.register(MessageWriter, self.writer)
 
     def because_we_resolve_the_instance(self):
@@ -140,7 +132,6 @@ class When_registering_a_service_with_a_singleton_instance:
 
 
 class When_registering_a_concrete_service_as_a_singleton:
-
     def given_a_container(self):
         self.container = Container()
         self.writer = StdoutMessageWriter()
@@ -173,13 +164,12 @@ class When_registering_an_arbitrary_callable_as_a_concrete_implementation:
 
 
 class When_registering_the_same_service_multiple_times:
-
     def given_a_container(self):
         self.container = Container()
 
     def because_we_register_two_writers(self):
         self.container.register(MessageWriter, StdoutMessageWriter)
-        self.container.register(MessageWriter, TmpFileMessageWriter('my-file'))
+        self.container.register(MessageWriter, TmpFileMessageWriter("my-file"))
 
     def it_should_resolve_the_latest_registration(self):
         expect(self.container.resolve(MessageWriter)).to(be_a(TmpFileMessageWriter))
@@ -195,10 +185,11 @@ class When_registering_the_same_service_multiple_times:
 
 
 class When_registering_a_service_and_providing_an_argument:
-
     def given_a_container(self):
         self.container = Container()
-        self.container.register(MessageWriter, FancyDbMessageWriter, cstr=lambda: "Hello world")
+        self.container.register(
+            MessageWriter, FancyDbMessageWriter, cstr=lambda: "Hello world"
+        )
 
     def because_we_resolve_an_instance(self):
         self.instance = self.container.resolve(MessageWriter)
@@ -210,32 +201,27 @@ class When_registering_a_service_and_providing_an_argument:
         expect(self.instance.connection_string).to(equal("Hello world"))
 
 
-
 class When_we_provide_an_argument_at_resolution_time:
-
     def given_a_container(self):
         self.container = Container()
         self.container.register(MessageWriter, TmpFileMessageWriter)
 
     def because_we_resolve_with_an_argument(self):
-        self.instance = self.container.resolve(MessageWriter, path='foo')
+        self.instance = self.container.resolve(MessageWriter, path="foo")
 
     def it_should_have_instantiated_the_instance_correctly(self):
-        expect(self.instance.path).to(equal('foo'))
+        expect(self.instance.path).to(equal("foo"))
 
 
 class When_we_need_to_resolve_a_list_of_dependencies:
-
     class BroadcastSpeaker:
-
         def __init__(self, writers: List[MessageWriter]) -> None:
             self.writers = writers
-
 
     def given_a_container(self):
         self.container = Container()
         self.container.register(MessageWriter, StdoutMessageWriter)
-        self.container.register(MessageWriter, TmpFileMessageWriter, path='my-file')
+        self.container.register(MessageWriter, TmpFileMessageWriter, path="my-file")
         self.container.register(MessageSpeaker, self.BroadcastSpeaker)
 
     def because_we_depend_on_a_list_of_registered_dependencies(self):
@@ -249,47 +235,50 @@ class Filter:
     pass
 
 
-class Is_A (Filter):
-    def __init__(self, next:Filter, spy):
+class Is_A(Filter):
+    def __init__(self, next: Filter, spy):
         self.spy = spy
         self.next = next
 
     def match(self, input):
-        self.spy.append('is_a')
-        return input == 'A' or self.next.match(input)
+        self.spy.append("is_a")
 
-class Is_B (Filter):
-    def __init__(self, next:Filter, spy):
+        return input == "A" or self.next.match(input)
+
+
+class Is_B(Filter):
+    def __init__(self, next: Filter, spy):
         self.spy = spy
         self.next = next
 
     def match(self, input):
-        self.spy.append('is_b')
-        return input == 'B' or self.next.match(input)
+        self.spy.append("is_b")
 
-class Is_C (Filter):
-    def __init__(self, next:Filter, spy):
+        return input == "B" or self.next.match(input)
+
+
+class Is_C(Filter):
+    def __init__(self, next: Filter, spy):
         self.spy = spy
         self.next = next
 
     def match(self, input):
-        self.spy.append('is_c')
-        return input == 'C' or self.next.match(input)
+        self.spy.append("is_c")
 
-class NullFilter (Filter):
+        return input == "C" or self.next.match(input)
+
+
+class NullFilter(Filter):
     def __init__(self, spy):
         self.spy = spy
 
     def match(self, input):
-        self.spy.append('null')
+        self.spy.append("null")
+
         return False
 
 
-
-
 class When_we_need_to_resolve_a_chain_of_collaborators:
-
-
     def given_a_container(self):
         self.spy = []
         self.container = Container()
@@ -300,8 +289,7 @@ class When_we_need_to_resolve_a_chain_of_collaborators:
 
     def because_we_resolve_an_instance_of_the_chain(self):
         self.filter = self.container.resolve(Filter)
-        self.filter.match('D')
+        self.filter.match("D")
 
     def it_should_call_each_element_in_turn(self):
-        expect(self.spy).to(equal(['is_a', 'is_b', 'is_c', 'null']))
-
+        expect(self.spy).to(equal(["is_a", "is_b", "is_c", "null"]))
