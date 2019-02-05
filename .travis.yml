@@ -1,8 +1,8 @@
+dist: xenial
 language: python
 python:
 - 3.6
 - 3.7
-  dist: xenial
 script:
 - make travis
 after_success:
