@@ -1,3 +1,4 @@
+BLACK_EXCLUSION=docs/source/conf.py
 default: init test
 travis: init check_lint test
 
