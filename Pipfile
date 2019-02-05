@@ -1,0 +1,22 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+colorama = "==0.3.9"
+expects = "==0.8.0"
+Contexts = "==0.11.2"
+black = "*"
+sphinx = "*"
+setuptools-scm = "*"
+
+[packages]
+setuptools-scm = "*"
+punq = {editable = true,path = "."}
+
+[requires]
+python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true

@@ -1,0 +1,15 @@
+language: python
+python:
+- 3.6
+- 3.7
+script:
+- make travis
+after_success:
+- codecov
+  #deploy:
+  # provider: pypi
+  #user: bobthemighty
+  #on:
+  #  tags: true
+  #  distributions: sdist bdist_wheel
+  #  repo: bobthemighty/punq
