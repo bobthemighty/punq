@@ -16,3 +16,4 @@ deploy:
   repo: bobthemighty/punq
   on:
     tags: true
+    python: 3.7
