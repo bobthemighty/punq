@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/madedotcom/photon-pump.svg?branch=master
+    :target: https://travis-ci.org/madedotcom/photon-pump
+
 Punq
 ====
 
