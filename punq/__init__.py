@@ -177,6 +177,7 @@ class Container:
 
     def register(self, service, _factory=None, **kwargs):
         self.registrations.register(service, _factory, **kwargs)
+        return self
 
     def resolve_all(self, service, **kwargs):
         context = self.registrations.build_context(service)

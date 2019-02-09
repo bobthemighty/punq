@@ -10,6 +10,8 @@ Contexts = "==0.11.2"
 black = "*"
 sphinx = "*"
 setuptools-scm = "*"
+pytest-cov = "*"
+pytest = "*"
 
 [packages]
 setuptools-scm = "*"
