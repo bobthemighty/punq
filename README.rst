@@ -1,5 +1,7 @@
-.. image:: https://travis-ci.org/madedotcom/photon-pump.svg?branch=master
-    :target: https://travis-ci.org/madedotcom/photon-pump
+.. image:: https://travis-ci.org/bobthemighty/punq.svg?branch=master
+    :target: https://travis-ci.org/bobthemighty/punq
+.. image:: https://img.shields.io/codecov/c/github/bobthemighty/punq.svg?style=flat
+    :target https://codecov.io/gh/bobthemighty/punq
 
 Punq
 ====
