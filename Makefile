@@ -7,7 +7,7 @@ init:
 	pipenv install --dev
 
 test: lint
-	pipenv run run-contexts -sv
+	pipenv run pytest --cov=punq
 
 lint:
 	pipenv run black . --exclude "${BLACK_EXCLUSION}"
