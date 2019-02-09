@@ -12,6 +12,7 @@ sphinx = "*"
 setuptools-scm = "*"
 pytest-cov = "*"
 pytest = "*"
+coveralls = "*"
 
 [packages]
 setuptools-scm = "*"
