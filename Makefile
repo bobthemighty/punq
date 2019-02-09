@@ -3,7 +3,7 @@ default: init test
 travis: init check_lint test
 
 init:
-	pip install pipenv
+	pip install pipenv coveralls
 	pipenv install --dev
 
 test: lint
