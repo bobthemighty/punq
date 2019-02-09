@@ -42,5 +42,3 @@ class HelloWorldSpeaker(MessageSpeaker):
 
     def speak(self):
         self.writer.write("Hello World")
-
-
