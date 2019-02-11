@@ -1,6 +1,7 @@
 import sys
 import typing
 from collections import defaultdict, namedtuple
+
 from pkg_resources import DistributionNotFound, get_distribution
 
 if sys.version_info >= (3, 7, 0):
@@ -8,10 +9,9 @@ if sys.version_info >= (3, 7, 0):
 else:
     from .py_36 import is_generic_list
 
-
-try:
+try:  # pragma no cover
     __version__ = get_distribution(__name__).version
-except DistributionNotFound:
+except DistributionNotFound:  # pragma no cover
     # package is not installed
     pass
 
@@ -25,6 +25,13 @@ class InvalidRegistrationException(Exception):
 
 
 Registration = namedtuple("Registration", ["service", "builder", "needs", "args"])
+
+
+class Empty:
+    pass
+
+
+empty = Empty()
 
 
 class Registry:
@@ -114,22 +121,22 @@ class Registry:
 
         return existing
 
-    def register(self, service, _factory=None, **kwargs):
+    def register(self, service, factory=empty, instance=empty, **kwargs):
         resolve_args = kwargs or {}
 
-        if _factory is None:
+        if instance is not empty:
+            self.register_service_and_instance(service, instance)
+        elif factory is empty:
             self.register_concrete_service(service)
-        elif callable(_factory):
-            self.register_service_and_impl(service, _factory, resolve_args)
+        elif callable(factory):
+            self.register_service_and_impl(service, factory, resolve_args)
         else:
-            self.register_service_and_instance(service, _factory)
+            raise InvalidRegistrationException(
+                f"Expected a callable factory for the service {service} but received {factory}"
+            )
 
     def __getitem__(self, service):
         return self.__registrations[service]
-
-    @property
-    def registrations(self):
-        return typing.MappingProxyType(self.__registrations)
 
 
 class ResolutionTarget:
@@ -175,8 +182,9 @@ class Container:
     def __init__(self):
         self.registrations = Registry()
 
-    def register(self, service, _factory=None, **kwargs):
-        self.registrations.register(service, _factory, **kwargs)
+    def register(self, service, factory=empty, instance=empty, **kwargs):
+        self.registrations.register(service, factory, instance, **kwargs)
+
         return self
 
     def resolve_all(self, service, **kwargs):

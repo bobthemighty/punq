@@ -1,4 +1,4 @@
-from typing import Callable, List, NewType
+from typing import Callable
 
 
 class MessageWriter:
@@ -25,7 +25,7 @@ class TmpFileMessageWriter(MessageWriter):
             f.write(msg)
 
 
-ConnectionStringFactory = NewType("ConnectionStringFactory", Callable[[], str])
+ConnectionStringFactory = Callable[[], str]
 
 
 class FancyDbMessageWriter(MessageWriter):
