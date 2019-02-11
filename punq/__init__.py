@@ -114,18 +114,18 @@ class Registry:
 
         return existing
 
-    def register(self, _service, _factory=None, _instance=None, **kwargs):
+    def register(self, service, factory=None, instance=None, **kwargs):
         resolve_args = kwargs or {}
 
-        if _instance is not None:
-            self.register_service_and_instance(_service, _instance)
-        elif _factory is None:
-            self.register_concrete_service(_service)
-        elif callable(_factory):
-            self.register_service_and_impl(_service, _factory, resolve_args)
+        if instance is not None:
+            self.register_service_and_instance(service, instance)
+        elif factory is None:
+            self.register_concrete_service(service)
+        elif callable(factory):
+            self.register_service_and_impl(service, factory, resolve_args)
         else:
             raise InvalidRegistrationException(
-                f"Expected a callable factory for the service {_service} but received {_factory}"
+                f"Expected a callable factory for the service {service} but received {factory}"
             )
 
     def __getitem__(self, service):
@@ -175,8 +175,8 @@ class Container:
     def __init__(self):
         self.registrations = Registry()
 
-    def register(self, service, _factory=None, **kwargs):
-        self.registrations.register(service, _factory, **kwargs)
+    def register(self, service, factory=None, instance=None, **kwargs):
+        self.registrations.register(service, factory, instance, **kwargs)
 
         return self
 

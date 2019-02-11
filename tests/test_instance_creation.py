@@ -59,7 +59,7 @@ def test_can_register_with_a_custom_factory():
 def test_can_register_an_instance():
     container = Container()
     writer = TmpFileMessageWriter("my-file")
-    container.register(MessageWriter, _instance=writer)
+    container.register(MessageWriter, instance=writer)
     expect(container.resolve(MessageWriter)).to(equal(writer))
 
 
