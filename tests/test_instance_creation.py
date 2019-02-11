@@ -2,11 +2,15 @@ from typing import List
 
 import pytest
 from expects import be, be_a, equal, expect, have_len
-from punq import (Container, InvalidRegistrationException,
-                  MissingDependencyException)
-from tests.test_dependencies import (FancyDbMessageWriter, HelloWorldSpeaker,
-                                     MessageSpeaker, MessageWriter,
-                                     StdoutMessageWriter, TmpFileMessageWriter)
+from punq import Container, InvalidRegistrationException, MissingDependencyException
+from tests.test_dependencies import (
+    FancyDbMessageWriter,
+    HelloWorldSpeaker,
+    MessageSpeaker,
+    MessageWriter,
+    StdoutMessageWriter,
+    TmpFileMessageWriter,
+)
 
 
 def test_can_create_instance_with_no_dependencies():
@@ -38,8 +42,7 @@ def test_can_register_a_concrete_type():
     container = Container()
     container.register(StdoutMessageWriter)
 
-    expect(container.resolve(StdoutMessageWriter)).to(
-        be_a(StdoutMessageWriter))
+    expect(container.resolve(StdoutMessageWriter)).to(be_a(StdoutMessageWriter))
 
 
 def test_can_register_with_a_custom_factory():
@@ -84,7 +87,6 @@ def test_registering_an_instance_as_factory_is_exception():
         container.register(MessageWriter, writer)
 
 
-
 def test_registering_a_callable_as_concrete_is_exception():
     """
     Likewise, if we register an arbitrary callable, there's
@@ -100,8 +102,7 @@ def test_registering_a_callable_as_concrete_is_exception():
 
 def test_can_provide_arguments_to_registrations():
     container = Container()
-    container.register(
-        MessageWriter, FancyDbMessageWriter, cstr=lambda: "Hello world")
+    container.register(MessageWriter, FancyDbMessageWriter, cstr=lambda: "Hello world")
 
     writer = container.resolve(MessageWriter)
 

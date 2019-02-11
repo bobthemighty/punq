@@ -4,7 +4,7 @@ from collections import defaultdict, namedtuple
 
 from pkg_resources import DistributionNotFound, get_distribution
 
-if sys.version_info >= (3, 7, 0): 
+if sys.version_info >= (3, 7, 0):
     from .py_37 import is_generic_list
 else:
     from .py_36 import is_generic_list
@@ -24,8 +24,7 @@ class InvalidRegistrationException(Exception):
     pass
 
 
-Registration = namedtuple("Registration",
-                          ["service", "builder", "needs", "args"])
+Registration = namedtuple("Registration", ["service", "builder", "needs", "args"])
 
 
 class Registry:
@@ -58,8 +57,8 @@ class Registry:
                 >>> Sending message via smtp
         """
         self.__registrations[service].append(
-            Registration(service, impl, self._get_needs_for_ctor(impl),
-                         resolve_args))
+            Registration(service, impl, self._get_needs_for_ctor(impl), resolve_args)
+        )
 
     def register_service_and_instance(self, service, instance):
         """Register a singleton instance to implement a service.
@@ -80,7 +79,8 @@ class Registry:
             ...     DataAccessLayer,
             ...     SqlAlchemyDataAccessLayer(create_engine(db_uri)))"""
         self.__registrations[service].append(
-            Registration(service, lambda: instance, {}, {}))
+            Registration(service, lambda: instance, {}, {})
+        )
 
     def register_concrete_service(self, service):
         """ Register a service as its own implementation.
@@ -99,18 +99,18 @@ class Registry:
         if not type(service) is type:
             raise InvalidRegistrationException(
                 "The service %s can't be registered as its own implementation"
-                % (repr(service)))
+                % (repr(service))
+            )
         self.__registrations[service].append(
-            Registration(service, service, self._get_needs_for_ctor(service),
-                         {}))
+            Registration(service, service, self._get_needs_for_ctor(service), {})
+        )
 
     def build_context(self, key, existing=None):
         if existing is None:
             return ResolutionContext(key, list(self.__getitem__(key)))
 
         if key not in existing.targets:
-            existing.targets[key] = ResolutionTarget(
-                key, list(self.__getitem__(key)))
+            existing.targets[key] = ResolutionTarget(key, list(self.__getitem__(key)))
 
         return existing
 
@@ -220,7 +220,8 @@ class Container:
 
         if registration is None:
             raise MissingDependencyException(
-                "Failed to resolve implementation for " + str(service_key))
+                "Failed to resolve implementation for " + str(service_key)
+            )
 
         if service_key in registration.needs.values():
             self._resolve_impl(service_key, kwargs, context)
