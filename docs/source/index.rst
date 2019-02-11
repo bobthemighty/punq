@@ -10,6 +10,10 @@ Welcome to Punq's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   api
+
+
+.. include:: ../../README.rst
 
 
 Indices and tables
