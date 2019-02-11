@@ -26,7 +26,12 @@ class InvalidRegistrationException(Exception):
 
 Registration = namedtuple("Registration", ["service", "builder", "needs", "args"])
 
-sentinel = object()
+
+class Empty:
+    pass
+
+
+empty = Empty()
 
 
 class Registry:
@@ -116,12 +121,12 @@ class Registry:
 
         return existing
 
-    def register(self, service, factory=sentinel, instance=sentinel, **kwargs):
+    def register(self, service, factory=empty, instance=empty, **kwargs):
         resolve_args = kwargs or {}
 
-        if instance is not sentinel:
+        if instance is not empty:
             self.register_service_and_instance(service, instance)
-        elif factory is sentinel:
+        elif factory is empty:
             self.register_concrete_service(service)
         elif callable(factory):
             self.register_service_and_impl(service, factory, resolve_args)
@@ -177,7 +182,7 @@ class Container:
     def __init__(self):
         self.registrations = Registry()
 
-    def register(self, service, factory=sentinel, instance=sentinel, **kwargs):
+    def register(self, service, factory=empty, instance=empty, **kwargs):
         self.registrations.register(service, factory, instance, **kwargs)
 
         return self
