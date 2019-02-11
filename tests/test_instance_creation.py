@@ -2,15 +2,11 @@ from typing import List
 
 import pytest
 from expects import be, be_a, equal, expect, have_len
-from punq import Container, InvalidRegistrationException, MissingDependencyException
-from tests.test_dependencies import (
-    FancyDbMessageWriter,
-    HelloWorldSpeaker,
-    MessageSpeaker,
-    MessageWriter,
-    StdoutMessageWriter,
-    TmpFileMessageWriter,
-)
+from punq import (Container, InvalidRegistrationException,
+                  MissingDependencyException)
+from tests.test_dependencies import (FancyDbMessageWriter, HelloWorldSpeaker,
+                                     MessageSpeaker, MessageWriter,
+                                     StdoutMessageWriter, TmpFileMessageWriter)
 
 
 def test_can_create_instance_with_no_dependencies():
@@ -42,7 +38,8 @@ def test_can_register_a_concrete_type():
     container = Container()
     container.register(StdoutMessageWriter)
 
-    expect(container.resolve(StdoutMessageWriter)).to(be_a(StdoutMessageWriter))
+    expect(container.resolve(StdoutMessageWriter)).to(
+        be_a(StdoutMessageWriter))
 
 
 def test_can_register_with_a_custom_factory():
@@ -58,11 +55,9 @@ def test_can_register_with_a_custom_factory():
 
 def test_can_register_an_instance():
     container = Container()
-    writer = TmpFileMessageWriter("/tmp/my-file")
-
-    container.register(MessageWriter, writer)
-    resolved = container.resolve(MessageWriter)
-    expect(resolved).to(be(writer))
+    writer = TmpFileMessageWriter("my-file")
+    container.register(MessageWriter, _instance=writer)
+    expect(container.resolve(MessageWriter)).to(equal(writer))
 
 
 def test_registering_an_instance_as_concrete_is_exception():
@@ -75,6 +70,19 @@ def test_registering_an_instance_as_concrete_is_exception():
 
     with pytest.raises(InvalidRegistrationException):
         container.register(writer)
+
+
+def test_registering_an_instance_as_factory_is_exception():
+    """
+    Concrete registrations need to be a constructable type
+    or there's no key we can use for resolution.
+    """
+    container = Container()
+    writer = MessageWriter()
+
+    with pytest.raises(InvalidRegistrationException):
+        container.register(MessageWriter, writer)
+
 
 
 def test_registering_a_callable_as_concrete_is_exception():
@@ -90,27 +98,10 @@ def test_registering_a_callable_as_concrete_is_exception():
         container.register(lambda: "oops")
 
 
-def test_resolve_returns_the_latest_registration_for_a_service():
-    container = Container()
-    container.register(MessageWriter, StdoutMessageWriter)
-    container.register(MessageWriter, TmpFileMessageWriter("my-file"))
-
-    expect(container.resolve(MessageWriter)).to(be_a(TmpFileMessageWriter))
-
-
-def test_resolve_all_returns_all_registrations_in_order():
-    container = Container()
-    container.register(MessageWriter, StdoutMessageWriter)
-    container.register(MessageWriter, TmpFileMessageWriter("my-file"))
-
-    [first, second] = container.resolve_all(MessageWriter)
-    expect(first).to(be_a(StdoutMessageWriter))
-    expect(second).to(be_a(TmpFileMessageWriter))
-
-
 def test_can_provide_arguments_to_registrations():
     container = Container()
-    container.register(MessageWriter, FancyDbMessageWriter, cstr=lambda: "Hello world")
+    container.register(
+        MessageWriter, FancyDbMessageWriter, cstr=lambda: "Hello world")
 
     writer = container.resolve(MessageWriter)
 
@@ -126,22 +117,19 @@ def test_can_provide_arguments_to_resolve():
     expect(instance.path).to(equal("foo"))
 
 
-def test_can_resolve_a_list_of_dependencies():
-    """
-    In this test we create a composite MessageSpeaker that depends on a list of MessageWriters.
-
-    When we resolve the speaker, it should be provided with a list of all the registered writers.
-    """
-
-    class BroadcastSpeaker:
-        def __init__(self, writers: List[MessageWriter]) -> None:
-            self.writers = writers
-
+def test_resolve_returns_the_latest_registration_for_a_service():
     container = Container()
     container.register(MessageWriter, StdoutMessageWriter)
-    container.register(MessageWriter, TmpFileMessageWriter("my-file"))
-    container.register(MessageSpeaker, BroadcastSpeaker)
+    container.register(MessageWriter, TmpFileMessageWriter, path="my-file")
 
-    instance = container.resolve(MessageSpeaker)
+    expect(container.resolve(MessageWriter)).to(be_a(TmpFileMessageWriter))
 
-    expect(instance.writers).to(have_len(2))
+
+def test_resolve_all_returns_all_registrations_in_order():
+    container = Container()
+    container.register(MessageWriter, StdoutMessageWriter)
+    container.register(MessageWriter, TmpFileMessageWriter, path="my-file")
+
+    [first, second] = container.resolve_all(MessageWriter)
+    expect(first).to(be_a(StdoutMessageWriter))
+    expect(second).to(be_a(TmpFileMessageWriter))
