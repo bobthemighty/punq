@@ -1,4 +1,4 @@
-BLACK_EXCLUSION=docs/source/conf.py
+BLACK_EXCLUSION=docs/source/conf.py,.venv
 default: init test
 travis: init check_lint test
 
