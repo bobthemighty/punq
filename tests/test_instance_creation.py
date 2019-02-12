@@ -134,3 +134,9 @@ def test_resolve_all_returns_all_registrations_in_order():
     [first, second] = container.resolve_all(MessageWriter)
     expect(first).to(be_a(StdoutMessageWriter))
     expect(second).to(be_a(TmpFileMessageWriter))
+
+
+def test_can_use_a_string_key():
+    container = Container()
+    container.register("foo", instance=1)
+    assert container.resolve("foo") == 1

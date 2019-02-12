@@ -17,6 +17,7 @@ codecov = "*"
 [packages]
 setuptools-scm = "*"
 punq = {editable = true,path = "."}
+attrs = "*"
 
 [requires]
 python_version = "3.7"
