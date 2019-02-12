@@ -30,7 +30,7 @@ class InvalidForwardReferenceException(Exception):
         When we try to inspect the constructor for the service we fail with an
         InvalidForwardReferenceException
 
-        >>> from dataclasses import dataclass
+        >>> from attr import dataclass
         >>> from punq import Container
         >>> @dataclass
         ... class Client:
@@ -38,15 +38,7 @@ class InvalidForwardReferenceException(Exception):
         >>> container = Container()
         >>> container.register(Client)
         Traceback (most recent call last):
-        File "<stdin>", line 1, in <module>
-        File "__init__.py", line 195, in register
-          self.registrations.register(service, factory, instance, **kwargs)
-        File "__init__.py", line 139, in register
-          self.register_concrete_service(service)
-        File "__init__.py", line 121, in register_concrete_service
-          Registration(service, service, self._get_needs_for_ctor(service), {})
-        File "__init__.py", line 53, in _get_needs_for_ctor
-          raise InvalidForwardReferenceException(str(e))
+        ...
         punq.InvalidForwardReferenceException: name 'Dependency' is not defined
 
 
@@ -57,12 +49,11 @@ class InvalidForwardReferenceException(Exception):
         ...     pass
         ...
         >>> container.register(Dependency)
-        <punq.Container object at 0x7f345cb6cac8>
+        <punq.Container object at 0x...>
         >>> container.register(Client)
-        >>> container.register(Client)
-        <punq.Container object at 0x7f345cb6cac8>
+        <punq.Container object at 0x...>
         >>> container.resolve(Client)
-        Client(dep=<__main__.Dependency object at 0x7f345c7f80f0>)
+        Client(dep=<punq.Dependency object at 0x...>)
 
 
         Alternatively, we can register a type using the literal key 'Dependency'.
@@ -71,13 +62,12 @@ class InvalidForwardReferenceException(Exception):
         ...     pass
         ...
         >>> container = Container()
-        <punq.Container object at 0x7fbd3a69ef60>
         >>> container.register('Dependency', AlternativeDependency)
-        <punq.Container object at 0x7fbd3a69ef60>
+        <punq.Container object at 0x...>
         >>> container.register(Client)
-        <punq.Container object at 0x7fbd3a69ef60>
+        <punq.Container object at 0x...>
         >>> container.resolve(Client)
-        Client(dep=<__main__.AlternativeDependency object at 0x7f345c7f80f0>)
+        Client(dep=<punq.AlternativeDependency object at 0x...>)
 
     """
 
@@ -121,13 +111,13 @@ class Registry:
                 ...
                 >>> class SmtpEmailSender(EmailSender):
                 ...     def send(self, msg):
-                ...         print("Sending message via smtp")
+                ...         print("Sending message via smtp: " + msg)
                 ...
                 >>> container.register(EmailSender, SmtpEmailSender)
                 <punq.Container object at 0x...>
                 >>> instance = container.resolve(EmailSender)
                 >>> instance.send("Hello")
-                Sending message via smtp
+                Sending message via smtp: Hello
         """
         self.__registrations[service].append(
             Registration(service, impl, self._get_needs_for_ctor(impl), resolve_args)
@@ -141,6 +131,9 @@ class Registry:
             wraps a resource that must not be shared, we might choose to
             use a singleton instance.
 
+            >>> from punq import Container
+            >>> container = Container()
+
             >>> class DataAccessLayer:
             ...     pass
             ...
@@ -150,8 +143,9 @@ class Registry:
             ...
             >>> container.register(
             ...     DataAccessLayer,
-            ...     SqlAlchemyDataAccessLayer(create_engine("sqlite:///"))
+            ...     instance=SqlAlchemyDataAccessLayer(create_engine("sqlite:///"))
             ... )
+            <punq.Container object at 0x...>
         """
         self.__registrations[service].append(
             Registration(service, lambda: instance, {}, {})
