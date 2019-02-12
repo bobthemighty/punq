@@ -82,6 +82,7 @@ class InvalidForwardReferenceException(Exception):
         >>> container.resolve(Client)
         Client(dep=<__main__.AlternativeDependency object at 0x7f345c7f80f0>)
     """
+
     pass
 
 
@@ -189,7 +190,6 @@ class Registry:
             self._localns[service.__name__] = service
         else:
             self._localns[service] = service
-
 
     def register(self, service, factory=empty, instance=empty, **kwargs):
         resolve_args = kwargs or {}
