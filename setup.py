@@ -24,7 +24,6 @@ setup(
     url="http://github.com/bobthemighty/punq",
     license="MIT",
     author="Bob Gregory",
-    tests_require=["colorama==0.3.9", "Contexts==0.11.2", "expects==0.8.0"],
     author_email="bob@codefiend.co.uk",
     description="Unintrusive dependency injection for Python 3.6 +",
     long_description=long_description,
