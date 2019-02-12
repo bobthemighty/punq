@@ -7,19 +7,20 @@ The fix is to provide a dict of the previously registered services to the
 get_type_hints function, so that we can resolve forward references to any
 previously registered service.
 """
-from dataclasses import dataclass
+
+import attr
 
 import punq
 import pytest
 
 
-@dataclass
-class Client(object):
+@attr.s(auto_attribs=True)
+class Client:
     dep: "Dependency"
 
 
-@dataclass
-class Dependency(object):
+@attr.s(auto_attribs=True)
+class Dependency:
     val = 1
 
 
