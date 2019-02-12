@@ -5,9 +5,9 @@ from collections import defaultdict, namedtuple
 from pkg_resources import DistributionNotFound, get_distribution
 
 if sys.version_info >= (3, 7, 0):
-    from .py_37 import is_generic_list
+    from .py_37 import is_generic_list, ensure_forward_ref
 else:
-    from .py_36 import is_generic_list
+    from .py_36 import is_generic_list, ensure_forward_ref
 
 try:  # pragma no cover
     __version__ = get_distribution(__name__).version
@@ -205,8 +205,7 @@ class Registry:
                 f"Expected a callable factory for the service {service} but received {factory}"
             )
         self._update_localns(service)
-        if isinstance(service, str):
-            self.register(typing.ForwardRef(service), factory, instance, **kwargs)
+        ensure_forward_ref(self, service, factory, instance, **kwargs)
 
     def __getitem__(self, service):
         return self.__registrations[service]
