@@ -2,9 +2,11 @@ import sys
 
 if sys.version_info >= (3, 7, 0):
     from typing import ForwardRef
+
     GenericListClass = list
 else:
     from typing import List, _ForwardRef as ForwardRef
+
     GenericListClass = List
 
 

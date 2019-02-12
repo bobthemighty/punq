@@ -14,5 +14,5 @@ def create_engine(db_uri: str):
 @pytest.fixture(autouse=True)
 def setup_doctest_context(doctest_namespace):
     """Here we register all classes that we use in our doctest examples."""
-    doctest_namespace['SQLAlchemy'] = SQLAlchemy
-    doctest_namespace['create_engine'] = create_engine
+    doctest_namespace["SQLAlchemy"] = SQLAlchemy
+    doctest_namespace["create_engine"] = create_engine
