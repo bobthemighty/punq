@@ -276,20 +276,22 @@ class Container:
             wraps a resouce that must not be shared, we might choose to
             use a singleton instance.
 
+            >>> from punq import Container
+            >>> container = Container()
+
             >>> class DataAccessLayer:
             ...     pass
             ...
-            >>> def create_engine(uri):
-            ... pass
-            ...
-            >>> class SqlAlchemyDataAccessLayer (DataAccessLayer):
-            ...     def __init__(self, engine):
+            >>> class SqlAlchemyDataAccessLayer(DataAccessLayer):
+            ...     def __init__(self, engine: SQLAlchemy.Engine):
             ...         pass
             ...
-            >>> dal = SqlAlchemyDataAccessLayer(create_engine(db_uri))
+            >>> dal = SqlAlchemyDataAccessLayer(create_engine("sqlite:///"))
             >>> container.register(
             ...     DataAccessLayer,
-            ...     dal)
+            ...     instance=dal
+            ... )
+            <punq.Container object at 0x...>
             >>> assert container.resolve(DataAccessLayer) is dal
 
             If we need to register a dependency, but we don't need to
@@ -301,6 +303,7 @@ class Container:
             ...         pass
             ...
             >>> container.register(FileReader)
+            <punq.Container object at 0x...>
             >>> assert type(container.resolve(FileReader)) == FileReader
 
             In this example, the EmailSender type is an abstract class
@@ -315,6 +318,7 @@ class Container:
             ...         print("Sending message via smtp")
             ...
             >>> container.register(EmailSender, SmtpEmailSender)
+            <punq.Container object at 0x...>
             >>> instance = container.resolve(EmailSender)
             >>> instance.send("beep")
             Sending message via smtp
