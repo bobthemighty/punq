@@ -24,6 +24,67 @@ class InvalidRegistrationException(Exception):
     pass
 
 
+class InvalidForwardReferenceException(Exception):
+    """
+    Raised when a registered service has a forward reference that can't be
+    resolved.
+
+    Examples:
+        In this example, we register a service with a string as a type annotation.
+        When we try to inspect the constructor for the service we fail with an
+        InvalidForwardReferenceException
+
+        >>> from dataclasses import dataclass
+        >>> @dataclass
+        ... class Client:
+        ...     dep: 'Dependency'
+        >>> container = Container()
+        >>> container.register(Client)
+        Traceback (most recent call last):
+        File "<stdin>", line 1, in <module>
+        File "__init__.py", line 195, in register
+          self.registrations.register(service, factory, instance, **kwargs)
+        File "__init__.py", line 139, in register
+          self.register_concrete_service(service)
+        File "__init__.py", line 121, in register_concrete_service
+          Registration(service, service, self._get_needs_for_ctor(service), {})
+        File "__init__.py", line 53, in _get_needs_for_ctor
+          raise InvalidForwardReferenceException(str(e))
+      punq.InvalidForwardReferenceException: name 'Dependency' is not defined
+
+
+        This error can be resolved by first registering a type with the name
+        'Dependency' in the container.
+
+        >>> class Dependency:
+        ...     pass
+        ...
+        >>> container.register(Dependency)
+        <punq.Container object at 0x7f345cb6cac8>
+        >>> container.register(Client)
+        >>> container.register(Client)
+        <punq.Container object at 0x7f345cb6cac8>
+        >>> container.resolve(Client)
+        Client(dep=<__main__.Dependency object at 0x7f345c7f80f0>)
+
+
+        Alternatively, we can register a type using the literal key 'Dependency'.
+
+        >>> class AlternativeDependency:
+        ...     pass
+        ...
+        >>> container = Container()
+        <punq.Container object at 0x7fbd3a69ef60>
+        >>> container.register('Dependency', AlternativeDependency)
+        <punq.Container object at 0x7fbd3a69ef60>
+        >>> container.register(Client)
+        <punq.Container object at 0x7fbd3a69ef60>
+        >>> container.resolve(Client)
+        Client(dep=<__main__.AlternativeDependency object at 0x7f345c7f80f0>)
+    """
+    pass
+
+
 Registration = namedtuple("Registration", ["service", "builder", "needs", "args"])
 
 
@@ -37,11 +98,13 @@ empty = Empty()
 class Registry:
     def __init__(self):
         self.__registrations = defaultdict(list)
+        self._localns = dict()
 
     def _get_needs_for_ctor(self, cls):
-        sig = typing.get_type_hints(cls.__init__)
-
-        return sig
+        try:
+            return typing.get_type_hints(cls.__init__, None, self._localns)
+        except NameError as e:
+            raise InvalidForwardReferenceException(str(e))
 
     def register_service_and_impl(self, service, impl, resolve_args):
         """Registers a concrete implementation of an abstract service.
@@ -121,6 +184,13 @@ class Registry:
 
         return existing
 
+    def _update_localns(self, service):
+        if type(service) == type:
+            self._localns[service.__name__] = service
+        else:
+            self._localns[service] = service
+
+
     def register(self, service, factory=empty, instance=empty, **kwargs):
         resolve_args = kwargs or {}
 
@@ -134,6 +204,9 @@ class Registry:
             raise InvalidRegistrationException(
                 f"Expected a callable factory for the service {service} but received {factory}"
             )
+        self._update_localns(service)
+        if isinstance(service, str):
+            self.register(typing.ForwardRef(service), factory, instance, **kwargs)
 
     def __getitem__(self, service):
         return self.__registrations[service]
