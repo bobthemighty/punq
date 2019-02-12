@@ -1,13 +1,9 @@
-import sys
 import typing
 from collections import defaultdict, namedtuple
 
 from pkg_resources import DistributionNotFound, get_distribution
 
-if sys.version_info >= (3, 7, 0):
-    from .py_37 import is_generic_list, ensure_forward_ref
-else:
-    from .py_36 import is_generic_list, ensure_forward_ref
+from ._compat import is_generic_list, ensure_forward_ref
 
 try:  # pragma no cover
     __version__ = get_distribution(__name__).version
@@ -35,6 +31,7 @@ class InvalidForwardReferenceException(Exception):
         InvalidForwardReferenceException
 
         >>> from dataclasses import dataclass
+        >>> from punq import Container
         >>> @dataclass
         ... class Client:
         ...     dep: 'Dependency'
@@ -50,7 +47,7 @@ class InvalidForwardReferenceException(Exception):
           Registration(service, service, self._get_needs_for_ctor(service), {})
         File "__init__.py", line 53, in _get_needs_for_ctor
           raise InvalidForwardReferenceException(str(e))
-      punq.InvalidForwardReferenceException: name 'Dependency' is not defined
+        punq.InvalidForwardReferenceException: name 'Dependency' is not defined
 
 
         This error can be resolved by first registering a type with the name
@@ -81,6 +78,7 @@ class InvalidForwardReferenceException(Exception):
         <punq.Container object at 0x7fbd3a69ef60>
         >>> container.resolve(Client)
         Client(dep=<__main__.AlternativeDependency object at 0x7f345c7f80f0>)
+
     """
 
     pass
@@ -114,18 +112,22 @@ class Registry:
                 In this example, the EmailSender type is an abstract class
                 and SmtpEmailSender is our concrete implementation.
 
+                >>> from punq import Container
+                >>> container = Container()
+
                 >>> class EmailSender:
                 ...     def send(self, msg):
                 ...         pass
                 ...
-                >>> class SmtpEmailSender (EmailSender):
+                >>> class SmtpEmailSender(EmailSender):
                 ...     def send(self, msg):
                 ...         print("Sending message via smtp")
                 ...
-                >>> container.register(EmailSender, SmtpSender)
+                >>> container.register(EmailSender, SmtpEmailSender)
+                <punq.Container object at 0x...>
                 >>> instance = container.resolve(EmailSender)
                 >>> instance.send("Hello")
-                >>> Sending message via smtp
+                Sending message via smtp
         """
         self.__registrations[service].append(
             Registration(service, impl, self._get_needs_for_ctor(impl), resolve_args)
@@ -136,37 +138,42 @@ class Registry:
 
         Examples:
             If we have an object that is expensive to construct, or that
-            wraps a resouce that must not be shared, we might choose to
+            wraps a resource that must not be shared, we might choose to
             use a singleton instance.
 
             >>> class DataAccessLayer:
             ...     pass
             ...
-            >>> class SqlAlchemyDataAccessLayer (DataAccessLayer):
-            ...     def __init__(self, engine:SqlAlchemy.Engine):
+            >>> class SqlAlchemyDataAccessLayer(DataAccessLayer):
+            ...     def __init__(self, engine: SQLAlchemy.Engine):
             ...         pass
             ...
             >>> container.register(
             ...     DataAccessLayer,
-            ...     SqlAlchemyDataAccessLayer(create_engine(db_uri)))"""
+            ...     SqlAlchemyDataAccessLayer(create_engine("sqlite:///"))
+            ... )
+        """
         self.__registrations[service].append(
             Registration(service, lambda: instance, {}, {})
         )
 
     def register_concrete_service(self, service):
-        """ Register a service as its own implementation.
+        """Register a service as its own implementation.
 
             Examples:
                 If we need to register a dependency, but we don't need to
                 abstract it, we can register it as concrete.
 
+                >>> from punq import Container
+                >>> container = Container()
                 >>> class FileReader:
-                ...     def read (self):
+                ...     def read(self):
                 ...         # Assorted legerdemain and rigmarole
                 ...         pass
                 ...
-                >>> container.register(FileReader)"""
-
+                >>> container.register(FileReader)
+                <punq.Container object at 0x...>
+        """
         if not type(service) is type:
             raise InvalidRegistrationException(
                 "The service %s can't be registered as its own implementation"
