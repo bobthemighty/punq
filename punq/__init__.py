@@ -255,7 +255,7 @@ class Container:
     """
     Provides dependency registration and resolution.
 
-    This is the main entrypoin of the Punq library. In normal scenarios users
+    This is the main entrypoint of the Punq library. In normal scenarios users
     will only need to interact with this class.
     """
 
