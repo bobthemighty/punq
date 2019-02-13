@@ -13,10 +13,25 @@ except DistributionNotFound:  # pragma no cover
 
 
 class MissingDependencyException(Exception):
+    """
+    Raised when a service, or one of its dependencies, is not registered.
+
+    Examples:
+        >>> import punq
+        >>> container = punq.Container()
+        >>> container.resolve("foo")
+        Traceback (most recent call last):
+        punq.MissingDependencyException: Failed to resolve implementation for foo
+    """
+
     pass
 
 
 class InvalidRegistrationException(Exception):
+    """
+    Raised when a registration would result in an unresolvable service.
+    """
+
     pass
 
 
@@ -252,12 +267,79 @@ class ResolutionContext:
 
 
 class Container:
+    """
+    Provides dependency registration and resolution.
+
+    This is the main entrypoint of the Punq library. In normal scenarios users
+    will only need to interact with this class.
+    """
+
     def __init__(self):
         self.registrations = Registry()
 
     def register(self, service, factory=empty, instance=empty, **kwargs):
-        self.registrations.register(service, factory, instance, **kwargs)
+        """
+        Register a dependency into the container.
 
+        Each registration in Punq has a "service", which is the key used for
+        resolving dependencies, and either an "instance" that implements the
+        service or a "factory" that understands how to create an instance on
+        demand.
+
+        Examples:
+            If we have an object that is expensive to construct, or that
+            wraps a resouce that must not be shared, we might choose to
+            use a singleton instance.
+
+            >>> from punq import Container
+            >>> container = Container()
+
+            >>> class DataAccessLayer:
+            ...     pass
+            ...
+            >>> class SqlAlchemyDataAccessLayer(DataAccessLayer):
+            ...     def __init__(self, engine: SQLAlchemy.Engine):
+            ...         pass
+            ...
+            >>> dal = SqlAlchemyDataAccessLayer(create_engine("sqlite:///"))
+            >>> container.register(
+            ...     DataAccessLayer,
+            ...     instance=dal
+            ... )
+            <punq.Container object at 0x...>
+            >>> assert container.resolve(DataAccessLayer) is dal
+
+            If we need to register a dependency, but we don't need to
+                abstract it, we can register it as concrete.
+
+            >>> class FileReader:
+            ...     def read (self):
+            ...         # Assorted legerdemain and rigmarole
+            ...         pass
+            ...
+            >>> container.register(FileReader)
+            <punq.Container object at 0x...>
+            >>> assert type(container.resolve(FileReader)) == FileReader
+
+            In this example, the EmailSender type is an abstract class
+            and SmtpEmailSender is our concrete implementation.
+
+            >>> class EmailSender:
+            ...     def send(self, msg):
+            ...         pass
+            ...
+            >>> class SmtpEmailSender (EmailSender):
+            ...     def send(self, msg):
+            ...         print("Sending message via smtp")
+            ...
+            >>> container.register(EmailSender, SmtpEmailSender)
+            <punq.Container object at 0x...>
+            >>> instance = container.resolve(EmailSender)
+            >>> instance.send("beep")
+            Sending message via smtp
+        """
+
+        self.registrations.register(service, factory, instance, **kwargs)
         return self
 
     def resolve_all(self, service, **kwargs):

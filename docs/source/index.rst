@@ -6,15 +6,25 @@
 Welcome to Punq's documentation!
 ================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+.. contents:
+.. include:: ../../README.rst
+
+API
+---
+
+.. autoclass:: punq.Container
+    :members:
+    :member-order: bysouce
+
+.. autoexception:: punq.MissingDependencyException
+    :members:
+    :member-order: bysouce
+
+.. autoexception:: punq.InvalidRegistrationException
+    :members:
+    :member-order: bysouce
 
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. autoexception:: punq.InvalidForwardReferenceException
+    :members:
+    :member-order: bysouce
