@@ -1,12 +1,15 @@
-.. image:: https://travis-ci.org/bobthemighty/punq.svg?branch=master
-    :target: https://travis-ci.org/bobthemighty/punq
-.. image:: https://img.shields.io/codecov/c/github/bobthemighty/punq.svg?style=flat
-    :target https://codecov.io/gh/bobthemighty/punq
-
 Punq
 ====
 
 An unintrusive library for dependency injection in modern Python.
+
+.. image:: https://travis-ci.org/bobthemighty/punq.svg?branch=master
+    :target: https://travis-ci.org/bobthemighty/punq
+.. image:: https://img.shields.io/codecov/c/github/bobthemighty/punq.svg?style=flat
+    :target https://codecov.io/gh/bobthemighty/punq
+.. image:: https://readthedocs.org/projects/punq/badge/?version=latest
+    :target: https://punq.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
 Inspired by `Funq`_, Punq is a dependency injection library you can understand.
 
@@ -124,3 +127,4 @@ Fuller documentation is available on `Read the docs`_.
 
 .. _cheese shop: https://pypi.org/project/punq/
 .. _Read the docs: http://punq.readthedocs.io/en/latest/ 
+.. _Funq: https://github.com/jlyonsmith/Funq
