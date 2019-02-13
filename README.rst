@@ -82,6 +82,10 @@ If our application's dependencies have their _own_ dependencies, Punq will injec
 
       def greet(self):
          print(self.config['greeting'])
+
+
+   container.register(Greeter)
+   container.resolve(Greeter).greet()
          
 If you just want to resolve an object without having any base class, that's okay::
 
