@@ -15,7 +15,7 @@ def read(*filenames, **kwargs):
     return sep.join(buf)
 
 
-long_description = read("README.rst", "CHANGES.md")
+long_description = read("README.rst", "CHANGES.rst")
 
 setup(
     name="punq",
