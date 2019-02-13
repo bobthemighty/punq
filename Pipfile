@@ -11,6 +11,7 @@ pytest = "*"
 codecov = "*"
 setuptools-scm = "*"
 expects = "*"
+doc8 = "*"
 
 [packages]
 punq = {editable = true,path = "."}

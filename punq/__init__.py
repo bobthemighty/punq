@@ -13,10 +13,25 @@ except DistributionNotFound:  # pragma no cover
 
 
 class MissingDependencyException(Exception):
+    """
+    Raised when a service, or one of its dependencies, is not registered.
+
+    Examples:
+        >>> import punq
+        >>> container = punq.Container()
+        >>> container.resolve("foo")
+        Traceback (most recent call last):
+        punq.MissingDependencyException: Failed to resolve implementation for foo
+    """
+
     pass
 
 
 class InvalidRegistrationException(Exception):
+    """
+    Raised when a registration would result in an unresolvable service.
+    """
+
     pass
 
 
