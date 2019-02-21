@@ -78,7 +78,7 @@ Now we can `resolve` the `ConfigReader` service, and receive a concrete implemen
 
    config = container.resolve(ConfigReader).get_config()
 
-If our application's dependencies have their _own_ dependencies, Punq will inject those, too:
+If our application's dependencies have their *own* dependencies, Punq will inject those, too:
 
 .. code:: python
 
