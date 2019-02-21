@@ -4,12 +4,14 @@ Punq
 An unintrusive library for dependency injection in modern Python.
 
 .. image:: https://travis-ci.org/bobthemighty/punq.svg?branch=master
-    :target: https://travis-ci.org/bobthemighty/punq
+      :target: https://travis-ci.org/bobthemighty/punq
+
 .. image:: https://img.shields.io/codecov/c/github/bobthemighty/punq.svg?style=flat
-    :target https://codecov.io/gh/bobthemighty/punq
+      :target: https://codecov.io/gh/bobthemighty/punq
+
 .. image:: https://readthedocs.org/projects/punq/badge/?version=latest
-    :target: https://punq.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
+      :target: https://punq.readthedocs.io/en/latest/?badge=latest
+      :alt: Documentation Status
 
 Inspired by `Funq`_, Punq is a dependency injection library you can understand.
 
@@ -21,38 +23,46 @@ Inspired by `Funq`_, Punq is a dependency injection library you can understand.
 Installation
 ------------
 
-Punq is available on the `cheese shop`_. ::
+Punq is available on the `cheese shop`_.
 
-   pip install punq
+.. code:: bash
+
+    pip install punq
 
 Documentation is available on `Read the docs`_.
 
 Quick Start
 -----------
 
-Punq avoids global state, so you must explicitly create a container in the entrypoint of your application::
+Punq avoids global state, so you must explicitly create a container in the entrypoint of your application:
+
+.. code:: python
 
    import punq
     
    container = punq.Container()
 
-Once you have a container, you can register your application's dependencies. In the simplest case, we can register any arbitrary object with some key::
+Once you have a container, you can register your application's dependencies. In the simplest case, we can register any arbitrary object with some key:
+
+.. code:: python
 
    container.register("connection_string", "postgresql://...")
 
-We can then request that object back from the container::
+We can then request that object back from the container:
+
+.. code:: python
 
    conn_str = container.resolve("connection_string")
 
-Usually, though, we want to register some object that implements a useful service.::
+Usually, though, we want to register some object that implements a useful service.:
+
+.. code:: python
 
    class ConfigReader:
-
       def get_config(self):
          pass
  
    class EnvironmentConfigReader(ConfigReader):
-
       def get_config(self):
          return {
             "logging": {
@@ -63,20 +73,22 @@ Usually, though, we want to register some object that implements a useful servic
 
    container.register(ConfigReader, EnvironmentConfigReader)
 
-Now we can `resolve` the `ConfigReader` service, and receive a concrete implementation::
+Now we can `resolve` the `ConfigReader` service, and receive a concrete implementation:
+
+.. code:: python
 
    config = container.resolve(ConfigReader).get_config()
 
-If our application's dependencies have their _own_ dependencies, Punq will inject those, too::
+If our application's dependencies have their _own_ dependencies, Punq will inject those, too:
+
+.. code:: python
 
    class Greeter:
-
       def greet(self):
          pass
 
 
    class ConsoleGreeter:
-
       def __init__(self, config_reader: ConfigReader):
          self.config = config_reader.get_config()
 
@@ -87,10 +99,11 @@ If our application's dependencies have their _own_ dependencies, Punq will injec
    container.register(Greeter)
    container.resolve(Greeter).greet()
          
-If you just want to resolve an object without having any base class, that's okay::
+If you just want to resolve an object without having any base class, that's okay:
+
+.. code:: python
 
    class Greeter:
-
       def __init__(self, config_reader: ConfigReader):
          self.config = config_reader.get_config()
 
@@ -100,14 +113,14 @@ If you just want to resolve an object without having any base class, that's okay
    container.register(Greeter)
    container.resolve(Greeter).greet()
          
-And if you need to have a singleton object for some reason, we can tell punq to register a specific instance of an object.::
+And if you need to have a singleton object for some reason, we can tell punq to register a specific instance of an object:
+
+.. code:: python
 
    class FileWritingGreeter:
-
       def __init__(self, path, greeting):
          self.path = path
          self.message = greeting
-
          self.file = open(self.path, 'w')
 
       def greet(self):
@@ -118,12 +131,16 @@ And if you need to have a singleton object for some reason, we can tell punq to 
    container.register(Greeter, instance=one_true_greeter)
 
 
-You might not know all of your arguments at registration time, but you can provide them later.::
+You might not know all of your arguments at registration time, but you can provide them later:
+
+.. code:: python
 
    container.register(Greeter, FileWritingGreeter)
    greeter = container.resolve(Greeter, path="/tmp/foo", greeting="Hello world")
 
-Conversely, you might want to provide arguments at registration time, without adding them to the container::
+Conversely, you might want to provide arguments at registration time, without adding them to the container:
+
+.. code:: python
 
    container.register(Greeter, FileWritingGreeter, path="/tmp/foo", greeting="Hello world")
    
