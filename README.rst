@@ -1,8 +1,6 @@
 Punq
 ====
 
-An unintrusive library for dependency injection in modern Python.
-
 .. image:: https://travis-ci.org/bobthemighty/punq.svg?branch=master
       :target: https://travis-ci.org/bobthemighty/punq
 
@@ -13,6 +11,7 @@ An unintrusive library for dependency injection in modern Python.
       :target: https://punq.readthedocs.io/en/latest/?badge=latest
       :alt: Documentation Status
 
+An unintrusive library for dependency injection in modern Python.
 Inspired by `Funq`_, Punq is a dependency injection library you can understand.
 
 - No global state
