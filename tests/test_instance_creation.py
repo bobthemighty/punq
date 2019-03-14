@@ -2,6 +2,8 @@ from typing import List
 
 import pytest
 from expects import be, be_a, equal, expect, have_len
+from tempfile import NamedTemporaryFile
+import os
 from punq import Container, InvalidRegistrationException, MissingDependencyException
 from tests.test_dependencies import (
     FancyDbMessageWriter,
@@ -118,10 +120,28 @@ def test_can_provide_arguments_to_resolve():
     expect(instance.path).to(equal("foo"))
 
 
+def test_can_provide_typed_arguments_to_resolve():
+    container = Container()
+    container.register(MessageWriter, TmpFileMessageWriter)
+    container.register(TmpFileMessageWriter)
+    container.register(HelloWorldSpeaker)
+
+    tmpfile = NamedTemporaryFile()
+
+    writer = container.resolve(MessageWriter, path=tmpfile.name)
+    speaker = container.resolve(HelloWorldSpeaker, writer=writer)
+
+    speaker.speak()
+
+    tmpfile.seek(0)
+    expect(tmpfile.read().decode()).to(equal('Hello World'))
+
+
 def test_resolve_returns_the_latest_registration_for_a_service():
     container = Container()
     container.register(MessageWriter, StdoutMessageWriter)
-    container.register(MessageWriter, TmpFileMessageWriter, path="my-file")
+
+    container.register(MessageWriter, TmpFileMessageWriter, path='my-file')
 
     expect(container.resolve(MessageWriter)).to(be_a(TmpFileMessageWriter))
 
