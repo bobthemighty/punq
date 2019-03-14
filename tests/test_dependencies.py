@@ -21,7 +21,7 @@ class TmpFileMessageWriter(MessageWriter):
         self.path = path
 
     def write(self, msg: str) -> None:
-        with open(self.path) as f:
+        with open(self.path, 'w') as f:
             f.write(msg)
 
 
