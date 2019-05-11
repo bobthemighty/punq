@@ -343,6 +343,41 @@ class Container:
         return self
 
     def resolve_all(self, service, **kwargs):
+        """
+        Return all registrations for a given service.
+
+        Some patterns require us to use multiple implementations of an
+        interface at the same time.
+
+        Examples:
+
+            In this example, we want to use multiple Authenticator instances to
+            check a request.
+
+            >>> class Authenticator:
+            ...     def matches(self, req):
+            ...         return False
+            ...
+            ...     def authenticate(self, req):
+            ...         return False
+            ...
+            >>> class BasicAuthenticator(Authenticator):
+            ...
+            ...     def matches(self, req):
+            ...         head = req.headers.get("Authorization", "")
+            ...         return head.startswith("Basic "):
+            ...
+            >>> class TokenAuthenticator(Authenticator):
+            ...
+            ...     def matches(self, req):
+            ...         head = req.headers.get("Authorization", "")
+            ...         return head.startswith("Bearer "):
+            ...
+            >>> def authenticate_request(container, req):
+            ...     for authn in req.resolve_all(Authenticator):
+            ...         if authn.matches(req):
+            ...             return authn.authenticate(req)
+        """
         context = self.registrations.build_context(service)
 
         return [
