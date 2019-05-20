@@ -365,13 +365,13 @@ class Container:
             ...
             ...     def matches(self, req):
             ...         head = req.headers.get("Authorization", "")
-            ...         return head.startswith("Basic "):
+            ...         return head.startswith("Basic ")
             ...
             >>> class TokenAuthenticator(Authenticator):
             ...
             ...     def matches(self, req):
             ...         head = req.headers.get("Authorization", "")
-            ...         return head.startswith("Bearer "):
+            ...         return head.startswith("Bearer ")
             ...
             >>> def authenticate_request(container, req):
             ...     for authn in req.resolve_all(Authenticator):
