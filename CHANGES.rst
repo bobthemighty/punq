@@ -16,8 +16,8 @@ Breaking Changes
     `container.register(Service, someInstance)` would register a concrete instance.
     This fixes https://github.com/bobthemighty/punq/issues/6
 
-0.1.2-alpha_ 2019-02-11
--------------------
+0.1.2-alpha 2019-02-11
+----------------------
 Feature
     First automatic Travis deploy
 
