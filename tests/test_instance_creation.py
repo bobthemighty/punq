@@ -134,14 +134,14 @@ def test_can_provide_typed_arguments_to_resolve():
     speaker.speak()
 
     tmpfile.seek(0)
-    expect(tmpfile.read().decode()).to(equal('Hello World'))
+    expect(tmpfile.read().decode()).to(equal("Hello World"))
 
 
 def test_resolve_returns_the_latest_registration_for_a_service():
     container = Container()
     container.register(MessageWriter, StdoutMessageWriter)
 
-    container.register(MessageWriter, TmpFileMessageWriter, path='my-file')
+    container.register(MessageWriter, TmpFileMessageWriter, path="my-file")
 
     expect(container.resolve(MessageWriter)).to(be_a(TmpFileMessageWriter))
 

@@ -392,8 +392,7 @@ class Container:
         args = {
             k: self._resolve_impl(v, resolution_args, context)
             for k, v in registration.needs.items()
-            if k != "return" and k not in registration.args \
-                and k not in resolution_args
+            if k != "return" and k not in registration.args and k not in resolution_args
         }
         args.update(registration.args)
         args.update(resolution_args or {})
