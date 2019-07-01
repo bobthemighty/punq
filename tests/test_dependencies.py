@@ -35,6 +35,13 @@ class FancyDbMessageWriter(MessageWriter):
     def write(self, msg):
         pass
 
+class WrappingMessageWriter(MessageWriter):
+    def __init__(self, wrapped: StdoutMessageWriter, context: str) -> None:
+        self.wrapped = wrapped
+        self.context = context
+
+    def write(self, msg):
+        self.wrapped.write(self.context + ": " + msg)
 
 class HelloWorldSpeaker(MessageSpeaker):
     def __init__(self, writer: MessageWriter) -> None:
