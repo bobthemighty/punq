@@ -120,6 +120,7 @@ def test_can_provide_arguments_to_resolve():
     instance = container.resolve(MessageWriter, path="foo")
     expect(instance.path).to(equal("foo"))
 
+
 def test_can_provide_arguments_to_resolve_having_dependencies():
     container = Container()
     container.register(StdoutMessageWriter, StdoutMessageWriter)
@@ -127,6 +128,7 @@ def test_can_provide_arguments_to_resolve_having_dependencies():
 
     instance = container.resolve(MessageWriter, context="bar")
     expect(instance.context).to(equal("bar"))
+
 
 def test_can_provide_typed_arguments_to_resolve():
     container = Container()

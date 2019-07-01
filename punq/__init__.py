@@ -398,8 +398,11 @@ class Container:
         args.update(registration.args)
 
         target_args = inspect.getfullargspec(registration.builder).args
-        if "self" in target_args: target_args.remove("self")
-        condensed_resolution_args = { key:resolution_args[key] for key in resolution_args if key in target_args }
+        if "self" in target_args:
+            target_args.remove("self")
+        condensed_resolution_args = {
+            key: resolution_args[key] for key in resolution_args if key in target_args
+        }
         args.update(condensed_resolution_args or {})
 
         result = registration.builder(**args)
