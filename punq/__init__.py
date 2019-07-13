@@ -1,4 +1,5 @@
 import typing
+import inspect
 from collections import defaultdict, namedtuple
 
 from pkg_resources import DistributionNotFound, get_distribution
@@ -395,7 +396,15 @@ class Container:
             if k != "return" and k not in registration.args and k not in resolution_args
         }
         args.update(registration.args)
-        args.update(resolution_args or {})
+
+        target_args = inspect.getfullargspec(registration.builder).args
+        if "self" in target_args:
+            target_args.remove("self")
+        condensed_resolution_args = {
+            key: resolution_args[key] for key in resolution_args if key in target_args
+        }
+        args.update(condensed_resolution_args or {})
+
         result = registration.builder(**args)
         context[registration.service] = result
 

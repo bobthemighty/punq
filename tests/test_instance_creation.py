@@ -12,6 +12,7 @@ from tests.test_dependencies import (
     MessageWriter,
     StdoutMessageWriter,
     TmpFileMessageWriter,
+    WrappingMessageWriter,
 )
 
 
@@ -118,6 +119,15 @@ def test_can_provide_arguments_to_resolve():
 
     instance = container.resolve(MessageWriter, path="foo")
     expect(instance.path).to(equal("foo"))
+
+
+def test_can_provide_arguments_to_resolve_having_dependencies():
+    container = Container()
+    container.register(StdoutMessageWriter, StdoutMessageWriter)
+    container.register(MessageWriter, WrappingMessageWriter)
+
+    instance = container.resolve(MessageWriter, context="bar")
+    expect(instance.context).to(equal("bar"))
 
 
 def test_can_provide_typed_arguments_to_resolve():
