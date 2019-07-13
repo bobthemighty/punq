@@ -1,6 +1,7 @@
 [run]
 branch = True
 source=punq
+omit=punq/_compat.py
 
 [report]
 show_missing = True
