@@ -4,7 +4,7 @@ import pytest
 from expects import be, be_a, equal, expect, have_len
 from tempfile import NamedTemporaryFile
 import os
-from punq import Container, InvalidRegistrationException, MissingDependencyException
+from punq import Container, Scope, InvalidRegistrationException, MissingDependencyException
 from tests.test_dependencies import (
     FancyDbMessageWriter,
     HelloWorldSpeaker,
@@ -64,6 +64,31 @@ def test_can_register_an_instance():
     writer = TmpFileMessageWriter("my-file")
     container.register(MessageWriter, instance=writer)
     expect(container.resolve(MessageWriter)).to(equal(writer))
+
+
+def test_resolves_instances_with_singleton_scope():
+    container = Container()
+    container.register(MessageWriter, StdoutMessageWriter, scope=Scope.singleton)
+
+    mw1 = container.resolve(MessageWriter)
+    mw2 = container.resolve(MessageWriter)
+    expect(mw1).to(equal(mw2))
+
+
+def test_resolves_instances_with_prototype_scope():
+    container = Container()
+    container.register(MessageWriter, StdoutMessageWriter, scope=Scope.prototype)
+
+    mw1 = container.resolve(MessageWriter)
+    mw2 = container.resolve(MessageWriter)
+    expect(mw1).not_to(equal(mw2))
+
+def test_registering_an_instance_with_prototype_scope_is_exception():
+    container = Container()
+    writer = StdoutMessageWriter()
+
+    with pytest.raises(InvalidRegistrationException):
+        container.register(MessageWriter, instance=writer, scope=Scope.prototype)
 
 
 def test_registering_an_instance_as_concrete_is_exception():
