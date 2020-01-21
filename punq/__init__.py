@@ -1,6 +1,7 @@
 import typing
 import inspect
 from collections import defaultdict, namedtuple
+from enum import Enum
 
 from pkg_resources import DistributionNotFound, get_distribution
 
@@ -90,7 +91,12 @@ class InvalidForwardReferenceException(Exception):
     pass
 
 
-Registration = namedtuple("Registration", ["service", "builder", "needs", "args"])
+Registration = namedtuple("Registration", ["service", "scope", "builder", "needs", "args"])
+
+
+class Scope(Enum):
+    singleton = 1
+    prototype = 2
 
 
 class Empty:
@@ -101,9 +107,10 @@ empty = Empty()
 
 
 class Registry:
-    def __init__(self):
+    def __init__(self, default_scope: Scope):
         self.__registrations = defaultdict(list)
         self._localns = dict()
+        self._default_scope = default_scope
 
     def _get_needs_for_ctor(self, cls):
         try:
@@ -111,7 +118,7 @@ class Registry:
         except NameError as e:
             raise InvalidForwardReferenceException(str(e))
 
-    def register_service_and_impl(self, service, impl, resolve_args):
+    def register_service_and_impl(self, service, scope, impl, resolve_args):
         """Registers a concrete implementation of an abstract service.
 
            Examples:
@@ -136,7 +143,7 @@ class Registry:
                 Sending message via smtp: Hello
         """
         self.__registrations[service].append(
-            Registration(service, impl, self._get_needs_for_ctor(impl), resolve_args)
+            Registration(service, scope, impl, self._get_needs_for_ctor(impl), resolve_args)
         )
 
     def register_service_and_instance(self, service, instance):
@@ -164,10 +171,10 @@ class Registry:
             <punq.Container object at 0x...>
         """
         self.__registrations[service].append(
-            Registration(service, lambda: instance, {}, {})
+            Registration(service, Scope.singleton, lambda: instance, {}, {})
         )
 
-    def register_concrete_service(self, service):
+    def register_concrete_service(self, service, scope):
         """Register a service as its own implementation.
 
             Examples:
@@ -190,7 +197,7 @@ class Registry:
                 % (repr(service))
             )
         self.__registrations[service].append(
-            Registration(service, service, self._get_needs_for_ctor(service), {})
+            Registration(service, scope, service, self._get_needs_for_ctor(service), {})
         )
 
     def build_context(self, key, existing=None):
@@ -208,15 +215,21 @@ class Registry:
         else:
             self._localns[service] = service
 
-    def register(self, service, factory=empty, instance=empty, **kwargs):
+    def register(self, service, factory=empty, instance=empty, scope=empty, **kwargs):
         resolve_args = kwargs or {}
 
+        scope = scope if scope != empty else self._default_scope
+
         if instance is not empty:
+            if scope is not Scope.singleton:
+                raise InvalidRegistrationException(
+                    f"Must use singleton scope to register instances, not {scope}"
+                )
             self.register_service_and_instance(service, instance)
         elif factory is empty:
-            self.register_concrete_service(service)
+            self.register_concrete_service(service, scope)
         elif callable(factory):
-            self.register_service_and_impl(service, factory, resolve_args)
+            self.register_service_and_impl(service, scope, factory, resolve_args)
         else:
             raise InvalidRegistrationException(
                 f"Expected a callable factory for the service {service} but received {factory}"
@@ -275,10 +288,10 @@ class Container:
     will only need to interact with this class.
     """
 
-    def __init__(self):
-        self.registrations = Registry()
+    def __init__(self, default_scope=Scope.singleton):
+        self.registrations = Registry(default_scope)
 
-    def register(self, service, factory=empty, instance=empty, **kwargs):
+    def register(self, service, factory=empty, instance=empty, scope=empty, **kwargs):
         """
         Register a dependency into the container.
 
@@ -340,7 +353,7 @@ class Container:
             Sending message via smtp
         """
 
-        self.registrations.register(service, factory, instance, **kwargs)
+        self.registrations.register(service, factory, instance, scope, **kwargs)
         return self
 
     def resolve_all(self, service, **kwargs):
@@ -406,7 +419,9 @@ class Container:
         args.update(condensed_resolution_args or {})
 
         result = registration.builder(**args)
-        context[registration.service] = result
+
+        if registration.scope == Scope.singleton:
+            context[registration.service] = result
 
         return result
 
