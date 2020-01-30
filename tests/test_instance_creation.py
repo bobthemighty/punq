@@ -66,6 +66,17 @@ def test_can_register_an_instance():
     expect(container.resolve(MessageWriter)).to(equal(writer))
 
 
+def test_resolves_instances_with_default_scope():
+    """
+    No scope specified should work the way prototype scope works
+    """
+    container = Container()
+    container.register(MessageWriter, StdoutMessageWriter)
+
+    mw1 = container.resolve(MessageWriter)
+    mw2 = container.resolve(MessageWriter)
+    expect(mw1).not_to(equal(mw2))
+
 def test_resolves_instances_with_singleton_scope():
     container = Container()
     container.register(MessageWriter, StdoutMessageWriter, scope=Scope.singleton)
