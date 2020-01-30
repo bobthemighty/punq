@@ -66,9 +66,9 @@ def test_can_register_an_instance():
     expect(container.resolve(MessageWriter)).to(equal(writer))
 
 
-def test_resolves_instances_with_default_scope():
+def test_resolves_instances():
     """
-    No scope specified should work the way prototype scope works
+    No scope specified should work the way transient scope works
     """
     container = Container()
     container.register(MessageWriter, StdoutMessageWriter)
@@ -89,28 +89,18 @@ def test_resolves_instances_with_singleton_scope():
 
 def test_resolves_instances_with_prototype_scope():
     container = Container()
-    container.register(MessageWriter, StdoutMessageWriter, scope=Scope.prototype)
+    container.register(MessageWriter, StdoutMessageWriter, scope=Scope.transient)
 
     mw1 = container.resolve(MessageWriter)
     mw2 = container.resolve(MessageWriter)
     expect(mw1).not_to(equal(mw2))
 
 
-def test_resolves_instances_with_default_singleton():
-    container = Container(default_scope=Scope.singleton)
-    container.register(MessageWriter, StdoutMessageWriter)
-
-    mw1 = container.resolve(MessageWriter)
-    mw2 = container.resolve(MessageWriter)
-    expect(mw1).to(equal(mw2))
-
-
-def test_registering_an_instance_with_prototype_scope_is_exception():
+def test_registering_instance_scope_without_an_instance_is_exception():
     container = Container()
-    writer = StdoutMessageWriter()
 
     with pytest.raises(InvalidRegistrationException):
-        container.register(MessageWriter, instance=writer, scope=Scope.prototype)
+        container.register(MessageWriter, StdoutMessageWriter, scope=Scope.instance)
 
 
 def test_registering_an_instance_as_concrete_is_exception():

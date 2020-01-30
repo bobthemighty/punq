@@ -93,7 +93,7 @@ class InvalidForwardReferenceException(Exception):
 
 
 class Scope(Enum):
-    prototype = 1
+    transient = 1
     singleton = 2
     instance = 3
 
@@ -116,10 +116,9 @@ empty = Empty()
 
 
 class Registry:
-    def __init__(self, default_scope: Scope):
+    def __init__(self):
         self.__registrations = defaultdict(list)
         self._localns = dict()
-        self._default_scope = default_scope
 
     def _get_needs_for_ctor(self, cls):
         try:
@@ -224,26 +223,24 @@ class Registry:
         else:
             self._localns[service] = service
 
-    def register(self, service, factory=empty, instance=empty, scope=empty, **kwargs):
+    def register(self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs):
         resolve_args = kwargs or {}
 
-        if instance is not empty:
-            if scope not in [Scope.instance, empty]:
-                raise InvalidRegistrationException(
-                    f"Must use instance scope to register instances, not {scope}"
-                )
-            self.register_service_and_instance(service, instance)
-        else:
-            scope = scope if scope != empty else self._default_scope
+        if scope is Scope.instance and instance is empty:
+            raise InvalidRegistrationException(
+                f"Must specify an instance when using Scope.instance"
+            )
 
-            if factory is empty:
-                self.register_concrete_service(service, scope)
-            elif callable(factory):
-                self.register_service_and_impl(service, scope, factory, resolve_args)
-            else:
-                raise InvalidRegistrationException(
-                    f"Expected a callable factory for the service {service} but received {factory}"
-                )
+        if instance is not empty:
+            self.register_service_and_instance(service, instance)
+        elif factory is empty:
+            self.register_concrete_service(service, scope)
+        elif callable(factory):
+            self.register_service_and_impl(service, scope, factory, resolve_args)
+        else:
+            raise InvalidRegistrationException(
+                f"Expected a callable factory for the service {service} but received {factory}"
+            )
 
         self._update_localns(service)
         ensure_forward_ref(self, service, factory, instance, **kwargs)
@@ -299,10 +296,10 @@ class Container:
     will only need to interact with this class.
     """
 
-    def __init__(self, default_scope=Scope.prototype):
-        self.registrations = Registry(default_scope)
+    def __init__(self):
+        self.registrations = Registry()
 
-    def register(self, service, factory=empty, instance=empty, scope=empty, **kwargs):
+    def register(self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs):
         """
         Register a dependency into the container.
 
