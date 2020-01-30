@@ -1,4 +1,5 @@
-import typing
+from dataclasses import dataclass
+from typing import Callable, Any, List, get_type_hints
 import inspect
 from collections import defaultdict, namedtuple
 from enum import Enum
@@ -91,12 +92,20 @@ class InvalidForwardReferenceException(Exception):
     pass
 
 
-Registration = namedtuple("Registration", ["service", "scope", "builder", "needs", "args"])
-
-
 class Scope(Enum):
-    singleton = 1
-    prototype = 2
+    prototype = 1
+    singleton = 2
+    instance = 3
+
+
+# Registration = namedtuple("Registration", ["service", "scope", "builder", "needs", "args"])
+@dataclass
+class Registration:
+    service: str
+    scope: Scope
+    builder: Callable[[], Any]
+    needs: Any
+    args: List[Any]
 
 
 class Empty:
@@ -114,7 +123,7 @@ class Registry:
 
     def _get_needs_for_ctor(self, cls):
         try:
-            return typing.get_type_hints(cls.__init__, None, self._localns)
+            return get_type_hints(cls.__init__, None, self._localns)
         except NameError as e:
             raise InvalidForwardReferenceException(str(e))
 
@@ -171,7 +180,7 @@ class Registry:
             <punq.Container object at 0x...>
         """
         self.__registrations[service].append(
-            Registration(service, Scope.singleton, lambda: instance, {}, {})
+            Registration(service, Scope.instance, lambda: instance, {}, {})
         )
 
     def register_concrete_service(self, service, scope):
@@ -218,22 +227,24 @@ class Registry:
     def register(self, service, factory=empty, instance=empty, scope=empty, **kwargs):
         resolve_args = kwargs or {}
 
-        scope = scope if scope != empty else self._default_scope
-
         if instance is not empty:
-            if scope is not Scope.singleton:
+            if scope not in [Scope.instance, empty]:
                 raise InvalidRegistrationException(
-                    f"Must use singleton scope to register instances, not {scope}"
+                    f"Must use instance scope to register instances, not {scope}"
                 )
             self.register_service_and_instance(service, instance)
-        elif factory is empty:
-            self.register_concrete_service(service, scope)
-        elif callable(factory):
-            self.register_service_and_impl(service, scope, factory, resolve_args)
         else:
-            raise InvalidRegistrationException(
-                f"Expected a callable factory for the service {service} but received {factory}"
-            )
+            scope = scope if scope != empty else self._default_scope
+
+            if factory is empty:
+                self.register_concrete_service(service, scope)
+            elif callable(factory):
+                self.register_service_and_impl(service, scope, factory, resolve_args)
+            else:
+                raise InvalidRegistrationException(
+                    f"Expected a callable factory for the service {service} but received {factory}"
+                )
+
         self._update_localns(service)
         ensure_forward_ref(self, service, factory, instance, **kwargs)
 
@@ -288,7 +299,7 @@ class Container:
     will only need to interact with this class.
     """
 
-    def __init__(self, default_scope=Scope.singleton):
+    def __init__(self, default_scope=Scope.prototype):
         self.registrations = Registry(default_scope)
 
     def register(self, service, factory=empty, instance=empty, scope=empty, **kwargs):
@@ -421,7 +432,11 @@ class Container:
         result = registration.builder(**args)
 
         if registration.scope == Scope.singleton:
-            context[registration.service] = result
+            # Promote scope to instance
+            registration.builder = lambda: result
+            registration.scope = Scope.instance
+
+        context[registration.service] = result
 
         return result
 
