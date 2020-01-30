@@ -77,6 +77,7 @@ def test_resolves_instances_with_default_scope():
     mw2 = container.resolve(MessageWriter)
     expect(mw1).not_to(equal(mw2))
 
+
 def test_resolves_instances_with_singleton_scope():
     container = Container()
     container.register(MessageWriter, StdoutMessageWriter, scope=Scope.singleton)
@@ -93,6 +94,16 @@ def test_resolves_instances_with_prototype_scope():
     mw1 = container.resolve(MessageWriter)
     mw2 = container.resolve(MessageWriter)
     expect(mw1).not_to(equal(mw2))
+
+
+def test_resolves_instances_with_default_singleton():
+    container = Container(default_scope=Scope.singleton)
+    container.register(MessageWriter, StdoutMessageWriter)
+
+    mw1 = container.resolve(MessageWriter)
+    mw2 = container.resolve(MessageWriter)
+    expect(mw1).to(equal(mw2))
+
 
 def test_registering_an_instance_with_prototype_scope_is_exception():
     container = Container()
