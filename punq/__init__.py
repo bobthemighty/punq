@@ -93,12 +93,9 @@ class InvalidForwardReferenceException(Exception):
 
 
 class Scope(Enum):
-    transient = 1
-    singleton = 2
-    instance = 3
+    transient = 0
+    singleton = 1
 
-
-# Registration = namedtuple("Registration", ["service", "scope", "builder", "needs", "args"])
 @dataclass
 class Registration:
     service: str
@@ -179,7 +176,7 @@ class Registry:
             <punq.Container object at 0x...>
         """
         self.__registrations[service].append(
-            Registration(service, Scope.instance, lambda: instance, {}, {})
+            Registration(service, Scope.singleton, lambda: instance, {}, {})
         )
 
     def register_concrete_service(self, service, scope):
@@ -225,11 +222,6 @@ class Registry:
 
     def register(self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs):
         resolve_args = kwargs or {}
-
-        if scope is Scope.instance and instance is empty:
-            raise InvalidRegistrationException(
-                f"Must specify an instance when using Scope.instance"
-            )
 
         if instance is not empty:
             self.register_service_and_instance(service, instance)
@@ -429,9 +421,7 @@ class Container:
         result = registration.builder(**args)
 
         if registration.scope == Scope.singleton:
-            # Promote scope to instance
             registration.builder = lambda: result
-            registration.scope = Scope.instance
 
         context[registration.service] = result
 
