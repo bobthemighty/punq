@@ -96,13 +96,6 @@ def test_resolves_instances_with_prototype_scope():
     expect(mw1).not_to(equal(mw2))
 
 
-def test_registering_instance_scope_without_an_instance_is_exception():
-    container = Container()
-
-    with pytest.raises(InvalidRegistrationException):
-        container.register(MessageWriter, StdoutMessageWriter, scope=Scope.instance)
-
-
 def test_registering_an_instance_as_concrete_is_exception():
     """
     Concrete registrations need to be a constructable type
