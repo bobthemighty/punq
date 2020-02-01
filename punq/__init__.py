@@ -96,6 +96,7 @@ class Scope(Enum):
     transient = 0
     singleton = 1
 
+
 @dataclass
 class Registration:
     service: str
@@ -148,7 +149,9 @@ class Registry:
                 Sending message via smtp: Hello
         """
         self.__registrations[service].append(
-            Registration(service, scope, impl, self._get_needs_for_ctor(impl), resolve_args)
+            Registration(
+                service, scope, impl, self._get_needs_for_ctor(impl), resolve_args
+            )
         )
 
     def register_service_and_instance(self, service, instance):
@@ -220,7 +223,9 @@ class Registry:
         else:
             self._localns[service] = service
 
-    def register(self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs):
+    def register(
+        self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs
+    ):
         resolve_args = kwargs or {}
 
         if instance is not empty:
@@ -291,7 +296,9 @@ class Container:
     def __init__(self):
         self.registrations = Registry()
 
-    def register(self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs):
+    def register(
+        self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs
+    ):
         """
         Register a dependency into the container.
 

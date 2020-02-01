@@ -4,7 +4,12 @@ import pytest
 from expects import be, be_a, equal, expect, have_len
 from tempfile import NamedTemporaryFile
 import os
-from punq import Container, Scope, InvalidRegistrationException, MissingDependencyException
+from punq import (
+    Container,
+    Scope,
+    InvalidRegistrationException,
+    MissingDependencyException,
+)
 from tests.test_dependencies import (
     FancyDbMessageWriter,
     HelloWorldSpeaker,
