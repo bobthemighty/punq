@@ -1,7 +1,6 @@
-from dataclasses import dataclass
-from typing import Callable, Any, List, get_type_hints
+from typing import Callable, Any, List, get_type_hints, NamedTuple
 import inspect
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from enum import Enum
 
 from pkg_resources import DistributionNotFound, get_distribution
@@ -97,8 +96,7 @@ class Scope(Enum):
     singleton = 1
 
 
-@dataclass
-class Registration:
+class Registration(NamedTuple):
     service: str
     scope: Scope
     builder: Callable[[], Any]
@@ -295,6 +293,7 @@ class Container:
 
     def __init__(self):
         self.registrations = Registry()
+        self._singletons = {}
 
     def register(
         self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs
@@ -428,7 +427,7 @@ class Container:
         result = registration.builder(**args)
 
         if registration.scope == Scope.singleton:
-            registration.builder = lambda: result
+            self._singletons[registration.service] = result
 
         context[registration.service] = result
 
@@ -437,6 +436,9 @@ class Container:
     def _resolve_impl(self, service_key, kwargs, context):
 
         context = self.registrations.build_context(service_key, context)
+
+        if service_key in self._singletons:
+            return self._singletons[service_key]
 
         if context.has_cached(service_key):
             return context[service_key]
