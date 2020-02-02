@@ -293,6 +293,7 @@ class Container:
 
     def __init__(self):
         self.registrations = Registry()
+        self.register(Container, instance=self)
         self._singletons = {}
 
     def register(

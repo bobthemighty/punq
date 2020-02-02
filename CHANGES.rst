@@ -1,6 +1,19 @@
 Changelog
 =========
 
+`0.4.1`_ 2020-02-01
+-------------------
+    The container now includes itself as a dependency. This makes some funky
+    use-cases simple to implement, eg. dynamic dispatch to multiple
+    implementations.
+
+`0.4.0`_ 2020-02-01
+-------------------
+    Punq now supports registering implementations as singleton. Singleton
+    instances are cached per-container, and instantiation is lazy, ie. we defer
+    creation until we first resolve the service.
+    Hat tip to `jbcpollak`_
+
 `0.3.0`_ 2019-07-13
 -------------------
 Fixes
@@ -37,4 +50,7 @@ Feature
 .. _0.2.0: https://github.com/bobthemighty/punq/compare/v0.1.2-alpha...v0.2
 .. _0.2.1: https://github.com/bobthemighty/punq/compare/v0.2...v0.2.1
 .. _0.3.0: https://github.com/bobthemighty/punq/compare/v0.2.1...v0.3.0
+.. _0.4.0: https://github.com/bobthemighty/punq/compare/v0.3.0...v0.4.0
+.. _0.4.1: https://github.com/bobthemighty/punq/compare/v0.4.0...v0.4.1
 .. _Thielen B: https://github.com/FourSpotProject
+.. _jbcpollak: https://github.com/jbcpollak
