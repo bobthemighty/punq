@@ -1,7 +1,7 @@
 import attr
 
 
-@attr.dataclass
+@attr.s
 class SameName:
     pass
 

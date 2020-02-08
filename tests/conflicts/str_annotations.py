@@ -1,16 +1,15 @@
-from __future__ import annotations
-
 import attr
 
 
-@attr.dataclass
+@attr.s
 class SameName:
     pass
 
 
 @attr.dataclass
 class Consumer:
-    attribute: SameName
+    # Emulate "from __future__ import annotations"
+    attribute: "SameName"
 
     def is_valid(self):
         return isinstance(self.attribute, SameName)
