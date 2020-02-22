@@ -2,6 +2,8 @@ from typing import Callable, Any, List, get_type_hints, NamedTuple
 import inspect
 from collections import defaultdict
 from enum import Enum
+import sys
+from types import SimpleNamespace
 
 from pkg_resources import DistributionNotFound, get_distribution
 
@@ -37,60 +39,6 @@ class InvalidRegistrationException(Exception):
     pass
 
 
-class InvalidForwardReferenceException(Exception):
-    """
-    Raised when a registered service has a forward reference that can't be
-    resolved.
-
-    Examples:
-        In this example, we register a service with a string as a type annotation.
-        When we try to inspect the constructor for the service we fail with an
-        InvalidForwardReferenceException
-
-        >>> from attr import dataclass
-        >>> from punq import Container
-        >>> @dataclass
-        ... class Client:
-        ...     dep: 'Dependency'
-        >>> container = Container()
-        >>> container.register(Client)
-        Traceback (most recent call last):
-        ...
-        punq.InvalidForwardReferenceException: name 'Dependency' is not defined
-
-
-        This error can be resolved by first registering a type with the name
-        'Dependency' in the container.
-
-        >>> class Dependency:
-        ...     pass
-        ...
-        >>> container.register(Dependency)
-        <punq.Container object at 0x...>
-        >>> container.register(Client)
-        <punq.Container object at 0x...>
-        >>> container.resolve(Client)
-        Client(dep=<punq.Dependency object at 0x...>)
-
-
-        Alternatively, we can register a type using the literal key 'Dependency'.
-
-        >>> class AlternativeDependency:
-        ...     pass
-        ...
-        >>> container = Container()
-        >>> container.register('Dependency', AlternativeDependency)
-        <punq.Container object at 0x...>
-        >>> container.register(Client)
-        <punq.Container object at 0x...>
-        >>> container.resolve(Client)
-        Client(dep=<punq.AlternativeDependency object at 0x...>)
-
-    """
-
-    pass
-
-
 class Scope(Enum):
     transient = 0
     singleton = 1
@@ -114,13 +62,9 @@ empty = Empty()
 class Registry:
     def __init__(self):
         self.__registrations = defaultdict(list)
-        self._localns = dict()
 
     def _get_needs_for_ctor(self, cls):
-        try:
-            return get_type_hints(cls.__init__, None, self._localns)
-        except NameError as e:
-            raise InvalidForwardReferenceException(str(e))
+        return get_type_hints(cls.__init__, vars(sys.modules[cls.__module__]))
 
     def register_service_and_impl(self, service, scope, impl, resolve_args):
         """Registers a concrete implementation of an abstract service.
@@ -215,16 +159,16 @@ class Registry:
 
         return existing
 
-    def _update_localns(self, service):
-        if type(service) == type:
-            self._localns[service.__name__] = service
-        else:
-            self._localns[service] = service
-
     def register(
-        self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs
+        self, service, frame, factory=empty, instance=empty, scope=Scope.transient, **kwargs
     ):
         resolve_args = kwargs or {}
+
+        if isinstance(service, str):
+            try:
+                service = get_type_hints(SimpleNamespace(__annotations__={"service": service}), frame.f_globals, frame.f_locals)["service"]
+            except NameError:
+                pass
 
         if instance is not empty:
             self.register_service_and_instance(service, instance)
@@ -237,8 +181,7 @@ class Registry:
                 f"Expected a callable factory for the service {service} but received {factory}"
             )
 
-        self._update_localns(service)
-        ensure_forward_ref(self, service, factory, instance, **kwargs)
+        ensure_forward_ref(self, service, frame, factory, instance, **kwargs)
 
     def __getitem__(self, service):
         return self.__registrations[service]
@@ -360,7 +303,9 @@ class Container:
             Sending message via smtp
         """
 
-        self.registrations.register(service, factory, instance, scope, **kwargs)
+        frame = sys._getframe(1)  # There MUST be a better way!
+
+        self.registrations.register(service, frame, factory, instance, scope, **kwargs)
         return self
 
     def resolve_all(self, service, **kwargs):

@@ -17,6 +17,6 @@ def is_generic_list(service):
         return False
 
 
-def ensure_forward_ref(self, service, factory, instance, **kwargs):
+def ensure_forward_ref(self, service, frame, factory, instance, **kwargs):
     if isinstance(service, str):
-        self.register(ForwardRef(service), factory, instance, **kwargs)
+        self.register(ForwardRef(service), frame, factory, instance, **kwargs)

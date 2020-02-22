@@ -41,17 +41,6 @@ def test_can_resolve_objects_with_forward_references():
     assert instance.dep.val == 1
 
 
-def test_forward_references_must_be_registered_before_their_clients():
-    """
-    If we haven't registered the 'Dependency' type yet, then we'll raise
-    a specific error so people can at least work out what the hell is happening
-    """
-    container = punq.Container()
-
-    with pytest.raises(punq.InvalidForwardReferenceException):
-        container.register(Client)
-
-
 def test_forward_references_can_be_registered_as_strings():
     """
     For cases where you want to declare a ref like 'module.Dep' we allow you to
