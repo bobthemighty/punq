@@ -160,13 +160,23 @@ class Registry:
         return existing
 
     def register(
-        self, service, frame, factory=empty, instance=empty, scope=Scope.transient, **kwargs
+        self,
+        service,
+        frame,
+        factory=empty,
+        instance=empty,
+        scope=Scope.transient,
+        **kwargs,
     ):
         resolve_args = kwargs or {}
 
         if isinstance(service, str):
             try:
-                service = get_type_hints(SimpleNamespace(__annotations__={"service": service}), frame.f_globals, frame.f_locals)["service"]
+                service = get_type_hints(
+                    SimpleNamespace(__annotations__={"service": service}),
+                    frame.f_globals,
+                    frame.f_locals,
+                )["service"]
             except NameError:
                 pass
 
