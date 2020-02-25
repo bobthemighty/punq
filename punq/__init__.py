@@ -7,7 +7,7 @@ from types import SimpleNamespace
 
 from pkg_resources import DistributionNotFound, get_distribution
 
-from ._compat import is_generic_list, ensure_forward_ref
+from ._compat import is_generic_list, ensure_forward_ref, get_globals_and_locals_of_parent
 
 try:  # pragma no cover
     __version__ = get_distribution(__name__).version
@@ -174,8 +174,7 @@ class Registry:
             try:
                 service = get_type_hints(
                     SimpleNamespace(__annotations__={"service": service}),
-                    frame.f_globals,
-                    frame.f_locals,
+                    *get_globals_and_locals_of_parent(frame),
                 )["service"]
             except NameError:
                 pass
@@ -313,7 +312,7 @@ class Container:
             Sending message via smtp
         """
 
-        frame = sys._getframe(1)  # There MUST be a better way!
+        frame = inspect.currentframe()
 
         self.registrations.register(service, frame, factory, instance, scope, **kwargs)
         return self

@@ -20,3 +20,11 @@ def is_generic_list(service):
 def ensure_forward_ref(self, service, frame, factory, instance, **kwargs):
     if isinstance(service, str):
         self.register(ForwardRef(service), frame, factory, instance, **kwargs)
+
+
+def get_globals_and_locals_of_parent(maybe_frame):
+    try:
+        parent_frame = maybe_frame.f_back
+    except AttributeError:
+        return {}, {}
+    return parent_frame.f_globals, parent_frame.f_locals
