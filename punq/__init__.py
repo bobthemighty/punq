@@ -312,9 +312,7 @@ class Container:
             Sending message via smtp
         """
 
-        frame = inspect.currentframe()
-
-        self.registrations.register(service, frame, factory, instance, scope, **kwargs)
+        self.registrations.register(service, inspect.currentframe(), factory, instance, scope, **kwargs)
         return self
 
     def resolve_all(self, service, **kwargs):
