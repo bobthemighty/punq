@@ -7,7 +7,11 @@ from types import SimpleNamespace
 
 from pkg_resources import DistributionNotFound, get_distribution
 
-from ._compat import is_generic_list, ensure_forward_ref, get_globals_and_locals_of_parent
+from ._compat import (
+    is_generic_list,
+    ensure_forward_ref,
+    get_globals_and_locals_of_parent,
+)
 
 try:  # pragma no cover
     __version__ = get_distribution(__name__).version
@@ -312,7 +316,9 @@ class Container:
             Sending message via smtp
         """
 
-        self.registrations.register(service, inspect.currentframe(), factory, instance, scope, **kwargs)
+        self.registrations.register(
+            service, inspect.currentframe(), factory, instance, scope, **kwargs
+        )
         return self
 
     def resolve_all(self, service, **kwargs):
