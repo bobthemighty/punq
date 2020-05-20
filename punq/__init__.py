@@ -197,7 +197,7 @@ class Registry:
                 >>> container.register(FileReader)
                 <punq.Container object at 0x...>
         """
-        if not type(service) is type:
+        if not inspect.isclass(service):
             raise InvalidRegistrationException(
                 "The service %s can't be registered as its own implementation"
                 % (repr(service))
