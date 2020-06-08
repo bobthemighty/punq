@@ -111,6 +111,24 @@ class Empty:
 empty = Empty()
 
 
+def match_defaults(args, defaults):
+    """
+    Matches args with their defaults in the result of getfullargspec
+
+    inspect.getfullargspec returns a complex object that includes the defaults
+    on args and kwonly args. This function takes a list of args, and a tuple of
+    the last N defaults and returns a dict of args to defaults.
+    """
+
+    if defaults is None:
+        return dict()
+
+    offset = len(args) - len(defaults)
+    defaults = ([None] * offset) + list(defaults)
+
+    return {key: value for key, value in zip(args, defaults) if value is not None}
+
+
 class Registry:
     def __init__(self):
         self.__registrations = defaultdict(list)
@@ -410,14 +428,21 @@ class Container:
         """Instantiate the registered service.
         """
 
-        args = {
-            k: self._resolve_impl(v, resolution_args, context)
-            for k, v in registration.needs.items()
-            if k != "return" and k not in registration.args and k not in resolution_args
-        }
+        spec = inspect.getfullargspec(registration.builder)
+        target_args = spec.args
+
+        args = match_defaults(spec.args, spec.defaults)
+        args.update(
+            {
+                k: self._resolve_impl(v, resolution_args, context, args.get(k))
+                for k, v in registration.needs.items()
+                if k != "return"
+                and k not in registration.args
+                and k not in resolution_args
+            }
+        )
         args.update(registration.args)
 
-        target_args = inspect.getfullargspec(registration.builder).args
         if "self" in target_args:
             target_args.remove("self")
         condensed_resolution_args = {
@@ -434,7 +459,7 @@ class Container:
 
         return result
 
-    def _resolve_impl(self, service_key, kwargs, context):
+    def _resolve_impl(self, service_key, kwargs, context, default=None):
 
         context = self.registrations.build_context(service_key, context)
 
@@ -450,6 +475,9 @@ class Container:
             return self.resolve_all(target.generic_parameter)
 
         registration = target.next_impl()
+
+        if registration is None and default is not None:
+            return default
 
         if registration is None:
             raise MissingDependencyException(
