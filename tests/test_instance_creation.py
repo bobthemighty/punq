@@ -201,6 +201,34 @@ def test_resolve_all_returns_all_registrations_in_order():
     expect(second).to(be_a(TmpFileMessageWriter))
 
 
+def test_can_instatiate_with_no_dependencies():
+    container = Container()
+
+    expect(container.instantiate(StdoutMessageWriter)).to(be_a(StdoutMessageWriter))
+
+
+def test_instantiate_dependencies_are_injected():
+    container = Container()
+    container.register(MessageWriter, StdoutMessageWriter)
+    container.register(MessageSpeaker)
+
+    speaker = container.instantiate(HelloWorldSpeaker)
+
+    expect(speaker).to(be_a(HelloWorldSpeaker))
+    expect(speaker.writer).to(be_a(StdoutMessageWriter))
+
+
+def test_can_instantiate_with_a_custom_factory():
+    container = Container()
+    container.register(MessageWriter, lambda: "win")
+    container.register(MessageSpeaker)
+
+    speaker = container.instantiate(HelloWorldSpeaker)
+
+    expect(speaker).to(be_a(HelloWorldSpeaker))
+    expect(speaker.writer).to(equal("win"))
+
+
 def test_can_use_a_string_key():
     container = Container()
     container.register("foo", instance=1)
