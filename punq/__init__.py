@@ -465,3 +465,15 @@ class Container:
         context = self.registrations.build_context(service_key)
 
         return self._resolve_impl(service_key, kwargs, context)
+
+    def instantiate(self, service_key, **kwargs):
+        """
+        Instantiate an unregistered service
+        """
+        registration = Registration(
+            service_key, Scope.transient, service_key,
+            self.registrations._get_needs_for_ctor(service_key), {})
+
+        context = ResolutionContext(service_key, list([registration]))
+
+        return self._build_impl(registration, kwargs, context)
