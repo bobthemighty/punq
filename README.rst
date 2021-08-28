@@ -45,7 +45,7 @@ Once you have a container, you can register your application's dependencies. In 
 
 .. code:: python
 
-   container.register("connection_string", "postgresql://...")
+   container.register("connection_string", instance="postgresql://...")
 
 We can then request that object back from the container:
 
