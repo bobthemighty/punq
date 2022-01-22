@@ -87,7 +87,7 @@ If our application's dependencies have their *own* dependencies, Punq will injec
          pass
 
 
-   class ConsoleGreeter:
+   class ConsoleGreeter(Greeter):
       def __init__(self, config_reader: ConfigReader):
          self.config = config_reader.get_config()
 
@@ -95,7 +95,7 @@ If our application's dependencies have their *own* dependencies, Punq will injec
          print(self.config['greeting'])
 
 
-   container.register(Greeter)
+   container.register(Greeter, ConsoleGreeter)
    container.resolve(Greeter).greet()
          
 If you just want to resolve an object without having any base class, that's okay:
