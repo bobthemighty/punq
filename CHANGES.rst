@@ -1,5 +1,18 @@
 Changelog
 =========
+`0.6.0`_ 2022-02-15
+-------------------
+    Replaced pipenv and Makefiles on Travis with this Hypermodern gubbins on
+    Github Actions.
+
+Deprecated
+    The types `MissingDependencyException`, `InvalidForwardReferenceException`, and
+    `InvalidRegistrationException` have been given the flake8 compatible names,
+    `MissingDependencyError`, `InvalidForwardReferenceError`, and
+    `InvalidRegistrationError` respectively.
+
+    The original classes are still present and usable, but will be removed from the
+    code with the upcoming 1.0 release.
 
 `0.4.1`_ 2020-02-01
 -------------------
@@ -52,5 +65,6 @@ Feature
 .. _0.3.0: https://github.com/bobthemighty/punq/compare/v0.2.1...v0.3.0
 .. _0.4.0: https://github.com/bobthemighty/punq/compare/v0.3.0...v0.4.0
 .. _0.4.1: https://github.com/bobthemighty/punq/compare/v0.4.0...v0.4.1
+.. _0.6.0: https://github.com/bobthemighty/punq/compare/v0.4.1...v0.6.0
 .. _Thielen B: https://github.com/FourSpotProject
 .. _jbcpollak: https://github.com/jbcpollak
