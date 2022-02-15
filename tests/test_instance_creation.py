@@ -9,8 +9,8 @@ from expects import equal
 from expects import expect
 from expects import have_len
 from punq import Container
-from punq import InvalidRegistrationException
-from punq import MissingDependencyException
+from punq import InvalidRegistrationError
+from punq import MissingDependencyError
 from punq import Scope
 from tests.test_dependencies import FancyDbMessageWriter
 from tests.test_dependencies import HelloWorldSpeaker
@@ -42,7 +42,7 @@ def test_missing_dependencies_raise_exception():
     container = Container()
     container.register(MessageSpeaker, HelloWorldSpeaker)
 
-    with pytest.raises(MissingDependencyException):
+    with pytest.raises(MissingDependencyError):
         container.resolve(MessageSpeaker)
 
 
@@ -109,7 +109,7 @@ def test_registering_an_instance_as_concrete_is_exception():
     container = Container()
     writer = MessageWriter()
 
-    with pytest.raises(InvalidRegistrationException):
+    with pytest.raises(InvalidRegistrationError):
         container.register(writer)
 
 
@@ -121,7 +121,7 @@ def test_registering_an_instance_as_factory_is_exception():
     container = Container()
     writer = MessageWriter()
 
-    with pytest.raises(InvalidRegistrationException):
+    with pytest.raises(InvalidRegistrationError):
         container.register(MessageWriter, writer)
 
 
@@ -134,7 +134,7 @@ def test_registering_a_callable_as_concrete_is_exception():
 
     container = Container()
 
-    with pytest.raises(InvalidRegistrationException):
+    with pytest.raises(InvalidRegistrationError):
         container.register(lambda: "oops")
 
 
