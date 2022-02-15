@@ -143,6 +143,7 @@ Conversely, you might want to provide arguments at registration time, without ad
 
    container.register(Greeter, FileWritingGreeter, path="/tmp/foo", greeting="Hello world")
 
+.. github-only
 Fuller documentation is available on `Read the docs`_.
 
 .. _cheese shop: https://pypi.org/project/punq/
