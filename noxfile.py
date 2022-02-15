@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 from pathlib import Path
 
 import nox
@@ -81,3 +82,19 @@ def safety(session: Session) -> None:
     requirements = session.poetry.export_requirements()
     session.install("safety")
     session.run("safety", "check", "--full-report", f"--file={requirements}")
+
+
+@session(python=python_versions)
+def xdoctest(session: Session) -> None:
+    """Run examples with xdoctest."""
+    if session.posargs:
+        args = [package, *session.posargs]
+    else:
+        args = [f"--modname={package}", "--command=all"]
+        if "FORCE_COLOR" in os.environ:
+            args.append("--colored=1")
+
+    session.install(".")
+    session.install("xdoctest[colors]")
+    session.install("SQLAlchemy")
+    session.run("python", "-m", "xdoctest", *args)

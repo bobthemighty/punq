@@ -42,7 +42,7 @@ class MissingDependencyError(Exception):
         >>> container = punq.Container()
         >>> container.resolve("foo")
         Traceback (most recent call last):
-        punq.MissingDependencyException: Failed to resolve implementation for foo
+        punq.MissingDependencyError: Failed to resolve implementation for foo
     """
 
     pass
@@ -62,7 +62,7 @@ class InvalidForwardReferenceError(Exception):
         When we try to inspect the constructor for the service we fail with an
         InvalidForwardReferenceError
 
-        >>> from attr import dataclass
+        >>> from dataclasses import dataclass
         >>> from punq import Container
         >>> @dataclass
         ... class Client:
@@ -198,6 +198,7 @@ class _Registry:
             wraps a resource that must not be shared, we might choose to
             use a singleton instance.
 
+            >>> import sqlalchemy
             >>> from punq import Container
             >>> container = Container()
 
@@ -205,12 +206,12 @@ class _Registry:
             ...     pass
             ...
             >>> class SqlAlchemyDataAccessLayer(DataAccessLayer):
-            ...     def __init__(self, engine: SQLAlchemy.Engine):
+            ...     def __init__(self, engine: sqlalchemy.engine.Engine):
             ...         pass
             ...
             >>> container.register(
             ...     DataAccessLayer,
-            ...     instance=SqlAlchemyDataAccessLayer(create_engine("sqlite:///"))
+            ...     instance=SqlAlchemyDataAccessLayer(sqlalchemy.create_engine("sqlite:///"))
             ... )
             <punq.Container object at 0x...>
         """
@@ -350,6 +351,7 @@ class Container:
             wraps a resouce that must not be shared, we might choose to
             use a singleton instance.
 
+            >>> import sqlalchemy
             >>> from punq import Container
             >>> container = Container()
 
@@ -357,10 +359,10 @@ class Container:
             ...     pass
             ...
             >>> class SqlAlchemyDataAccessLayer(DataAccessLayer):
-            ...     def __init__(self, engine: SQLAlchemy.Engine):
+            ...     def __init__(self, engine: sqlalchemy.engine.Engine):
             ...         pass
             ...
-            >>> dal = SqlAlchemyDataAccessLayer(create_engine("sqlite:///"))
+            >>> dal = SqlAlchemyDataAccessLayer(sqlalchemy.create_engine("sqlite:///"))
             >>> container.register(
             ...     DataAccessLayer,
             ...     instance=dal
@@ -418,13 +420,11 @@ class Container:
             ...         return False
             ...
             >>> class BasicAuthenticator(Authenticator):
-            ...
             ...     def matches(self, req):
             ...         head = req.headers.get("Authorization", "")
             ...         return head.startswith("Basic ")
             ...
             >>> class TokenAuthenticator(Authenticator):
-            ...
             ...     def matches(self, req):
             ...         head = req.headers.get("Authorization", "")
             ...         return head.startswith("Bearer ")
