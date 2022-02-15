@@ -1,3 +1,17 @@
+"""Simple IOC container.
+
+Classes:
+
+    Container
+    MissingDependencyError
+    InvalidRegistrationError
+    InvalidForwardReferenceError
+    Scope
+
+Misc Variables:
+
+    empty
+"""
 import inspect
 from collections import defaultdict
 from enum import Enum
@@ -20,9 +34,8 @@ except DistributionNotFound:  # pragma no cover
     pass
 
 
-class MissingDependencyException(Exception):
-    """
-    Raised when a service, or one of its dependencies, is not registered.
+class MissingDependencyError(Exception):
+    """Raised when a service, or one of its dependencies, is not registered.
 
     Examples:
         >>> import punq
@@ -35,23 +48,19 @@ class MissingDependencyException(Exception):
     pass
 
 
-class InvalidRegistrationException(Exception):
-    """
-    Raised when a registration would result in an unresolvable service.
-    """
+class InvalidRegistrationError(Exception):
+    """Raised when a registration would result in an unresolvable service."""
 
     pass
 
 
-class InvalidForwardReferenceException(Exception):
-    """
-    Raised when a registered service has a forward reference that can't be
-    resolved.
+class InvalidForwardReferenceError(Exception):
+    """Raised when a registered service has a forward reference that can't be resolved.
 
     Examples:
         In this example, we register a service with a string as a type annotation.
         When we try to inspect the constructor for the service we fail with an
-        InvalidForwardReferenceException
+        InvalidForwardReferenceError
 
         >>> from attr import dataclass
         >>> from punq import Container
@@ -62,7 +71,7 @@ class InvalidForwardReferenceException(Exception):
         >>> container.register(Client)
         Traceback (most recent call last):
         ...
-        punq.InvalidForwardReferenceException: name 'Dependency' is not defined
+        punq.InvalidForwardReferenceError: name 'Dependency' is not defined
 
 
         This error can be resolved by first registering a type with the name
@@ -98,11 +107,18 @@ class InvalidForwardReferenceException(Exception):
 
 
 class Scope(Enum):
+    """Controls the lifetime of resolved objects.
+
+    Attributes:
+        transient: create a fresh instance for each `resolve` call
+        singleton: re-use a single instance for every `resolve` call
+    """
+
     transient = 0
     singleton = 1
 
 
-class Registration(NamedTuple):
+class _Registration(NamedTuple):
     service: str
     scope: Scope
     builder: Callable[[], Any]
@@ -110,22 +126,20 @@ class Registration(NamedTuple):
     args: List[Any]
 
 
-class Empty:
+class _Empty:
     pass
 
 
-empty = Empty()
+empty = _Empty()
 
 
-def match_defaults(args, defaults):
-    """
-    Matches args with their defaults in the result of getfullargspec
+def _match_defaults(args, defaults):
+    """Matches args with their defaults in the result of getfullargspec.
 
     inspect.getfullargspec returns a complex object that includes the defaults
     on args and kwonly args. This function takes a list of args, and a tuple of
     the last N defaults and returns a dict of args to defaults.
     """
-
     if defaults is None:
         return dict()
 
@@ -135,7 +149,7 @@ def match_defaults(args, defaults):
     return {key: value for key, value in zip(args, defaults) if value is not None}
 
 
-class Registry:
+class _Registry:
     def __init__(self):
         self.__registrations = defaultdict(list)
         self._localns = dict()
@@ -144,7 +158,7 @@ class Registry:
         try:
             return get_type_hints(cls.__init__, None, self._localns)
         except NameError as e:
-            raise InvalidForwardReferenceException(str(e))
+            raise InvalidForwardReferenceError(str(e)) from e
 
     def register_service_and_impl(self, service, scope, impl, resolve_args):
         """Registers a concrete implementation of an abstract service.
@@ -171,7 +185,7 @@ class Registry:
              Sending message via smtp: Hello
         """
         self.__registrations[service].append(
-            Registration(
+            _Registration(
                 service, scope, impl, self._get_needs_for_ctor(impl), resolve_args
             )
         )
@@ -201,7 +215,7 @@ class Registry:
             <punq.Container object at 0x...>
         """
         self.__registrations[service].append(
-            Registration(service, Scope.singleton, lambda: instance, {}, {})
+            _Registration(service, Scope.singleton, lambda: instance, {}, {})
         )
 
     def register_concrete_service(self, service, scope):
@@ -222,20 +236,22 @@ class Registry:
             <punq.Container object at 0x...>
         """
         if not inspect.isclass(service):
-            raise InvalidRegistrationException(
+            raise InvalidRegistrationError(
                 "The service %s can't be registered as its own implementation"
                 % (repr(service))
             )
         self.__registrations[service].append(
-            Registration(service, scope, service, self._get_needs_for_ctor(service), {})
+            _Registration(
+                service, scope, service, self._get_needs_for_ctor(service), {}
+            )
         )
 
     def build_context(self, key, existing=None):
         if existing is None:
-            return ResolutionContext(key, list(self.__getitem__(key)))
+            return _ResolutionContext(key, list(self.__getitem__(key)))
 
         if key not in existing.targets:
-            existing.targets[key] = ResolutionTarget(key, list(self.__getitem__(key)))
+            existing.targets[key] = _ResolutionTarget(key, list(self.__getitem__(key)))
 
         return existing
 
@@ -257,8 +273,8 @@ class Registry:
         elif callable(factory):
             self.register_service_and_impl(service, scope, factory, resolve_args)
         else:
-            raise InvalidRegistrationException(
-                f"Expected a callable factory for the service {service} but received {factory}"
+            raise InvalidRegistrationError(
+                f"Expected a callable factory for the service {service} but received {factory}"  # noqa
             )
 
         self._update_localns(service)
@@ -268,7 +284,7 @@ class Registry:
         return self.__registrations[service]
 
 
-class ResolutionTarget:
+class _ResolutionTarget:
     def __init__(self, key, impls):
         self.service = key
         self.impls = impls
@@ -285,9 +301,9 @@ class ResolutionTarget:
             return self.impls.pop()
 
 
-class ResolutionContext:
+class _ResolutionContext:
     def __init__(self, key, impls):
-        self.targets = {key: ResolutionTarget(key, impls)}
+        self.targets = {key: _ResolutionTarget(key, impls)}
         self.cache = {}
         self.service = key
 
@@ -308,23 +324,21 @@ class ResolutionContext:
 
 
 class Container:
-    """
-    Provides dependency registration and resolution.
+    """Provides dependency registration and resolution.
 
     This is the main entrypoint of the Punq library. In normal scenarios users
     will only need to interact with this class.
     """
 
     def __init__(self):
-        self.registrations = Registry()
+        self.registrations = _Registry()
         self.register(Container, instance=self)
         self._singletons = {}
 
     def register(
         self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs
     ):
-        """
-        Register a dependency into the container.
+        """Register a dependency into the container.
 
         Each registration in Punq has a "service", which is the key used for
         resolving dependencies, and either an "instance" that implements the
@@ -383,19 +397,16 @@ class Container:
             >>> instance.send("beep")
             Sending message via smtp
         """
-
         self.registrations.register(service, factory, instance, scope, **kwargs)
         return self
 
     def resolve_all(self, service, **kwargs):
-        """
-        Return all registrations for a given service.
+        """Return all registrations for a given service.
 
         Some patterns require us to use multiple implementations of an
         interface at the same time.
 
         Examples:
-
             In this example, we want to use multiple Authenticator instances to
             check a request.
 
@@ -432,11 +443,10 @@ class Container:
 
     def _build_impl(self, registration, resolution_args, context):
         """Instantiate the registered service."""
-
         spec = inspect.getfullargspec(registration.builder)
         target_args = spec.args
 
-        args = match_defaults(spec.args, spec.defaults)
+        args = _match_defaults(spec.args, spec.defaults)
         args.update(
             {
                 k: self._resolve_impl(v, resolution_args, context, args.get(k))
@@ -485,7 +495,7 @@ class Container:
             return default
 
         if registration is None:
-            raise MissingDependencyException(
+            raise MissingDependencyError(
                 "Failed to resolve implementation for " + str(service_key)
             )
 
@@ -495,15 +505,14 @@ class Container:
         return self._build_impl(registration, kwargs, context)
 
     def resolve(self, service_key, **kwargs):
+        """Build an return an instance of a registered service."""
         context = self.registrations.build_context(service_key)
 
         return self._resolve_impl(service_key, kwargs, context)
 
     def instantiate(self, service_key, **kwargs):
-        """
-        Instantiate an unregistered service
-        """
-        registration = Registration(
+        """Instantiate an unregistered service."""
+        registration = _Registration(
             service_key,
             Scope.transient,
             service_key,
@@ -511,6 +520,6 @@ class Container:
             {},
         )
 
-        context = ResolutionContext(service_key, list([registration]))
+        context = _ResolutionContext(service_key, list([registration]))
 
         return self._build_impl(registration, kwargs, context)
