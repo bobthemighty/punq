@@ -46,7 +46,7 @@ def test_forward_references_must_be_registered_before_their_clients():
     """
     container = punq.Container()
 
-    with pytest.raises(punq.InvalidForwardReferenceException):
+    with pytest.raises(punq.InvalidForwardReferenceError):
         container.register(Client)
 
 
