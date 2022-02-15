@@ -19,6 +19,7 @@ package = "punq"
 python_versions = ["3.10", "3.9", "3.8", "3.7"]
 nox.needs_version = ">= 2021.6.6"
 
+
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Run the test suite."""
@@ -29,6 +30,7 @@ def tests(session: Session) -> None:
     finally:
         if session.interactive:
             session.notify("coverage", posargs=[])
+
 
 @session
 def coverage(session: Session) -> None:
@@ -42,10 +44,12 @@ def coverage(session: Session) -> None:
 
     session.run("coverage", *args)
 
+
 @session
 def lint(session):
-    session.install('flake8')
-    session.run('flake8', '--import-order-style', 'google')
+    session.install("flake8")
+    session.run("flake8", "--import-order-style", "google")
+
 
 @session(name="pre-commit", python="3.10")
 def precommit(session: Session) -> None:
