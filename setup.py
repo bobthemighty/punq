@@ -1,4 +1,5 @@
 import io
+from pathlib import Path
 
 from setuptools import setup
 
@@ -15,7 +16,8 @@ def read(*filenames, **kwargs):
     return sep.join(buf)
 
 
-long_description = read("README.rst", "CHANGES.rst")
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.rst").read_text()
 
 setup(
     name="punq",

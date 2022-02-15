@@ -6,6 +6,9 @@ Classes:
     MissingDependencyError
     InvalidRegistrationError
     InvalidForwardReferenceError
+    MissingDependencyException
+    InvalidRegistrationException
+    InvalidForwardReferenceException
     Scope
 
 Misc Variables:
@@ -34,7 +37,13 @@ except DistributionNotFound:  # pragma no cover
     pass
 
 
-class MissingDependencyError(Exception):
+class MissingDependencyException(Exception):  # noqa
+    """Deprecated alias for MissingDependencyError."""
+
+    pass
+
+
+class MissingDependencyError(MissingDependencyException):
     """Raised when a service, or one of its dependencies, is not registered.
 
     Examples:
@@ -48,13 +57,25 @@ class MissingDependencyError(Exception):
     pass
 
 
-class InvalidRegistrationError(Exception):
+class InvalidRegistrationException(Exception):  # noqa
+    """Deprecated alias for InvalidRegistrationError."""
+
+    pass
+
+
+class InvalidRegistrationError(InvalidRegistrationException):
     """Raised when a registration would result in an unresolvable service."""
 
     pass
 
 
-class InvalidForwardReferenceError(Exception):
+class InvalidForwardReferenceException(Exception):  # noqa
+    """Deprecated alias for InvalidForwardReferenceError."""
+
+    pass
+
+
+class InvalidForwardReferenceError(InvalidForwardReferenceException):
     """Raised when a registered service has a forward reference that can't be resolved.
 
     Examples:
