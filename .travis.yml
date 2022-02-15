@@ -1,12 +1,12 @@
 dist: xenial
 language: python
 python:
-- 3.6
-- 3.7
+  - 3.6
+  - 3.7
 script:
-- make travis
+  - make travis
 after_success:
-- codecov
+  - codecov
 deploy:
   provider: pypi
   password:

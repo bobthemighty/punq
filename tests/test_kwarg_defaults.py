@@ -1,4 +1,8 @@
-from expects import be, be_a, equal, expect, have_len
+from expects import be
+from expects import be_a
+from expects import equal
+from expects import expect
+from expects import have_len
 from punq import Container
 
 
