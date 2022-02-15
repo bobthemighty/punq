@@ -63,7 +63,7 @@ Usually, though, we want to register some object that implements a useful servic
          return {
             "logging": {
                "level": os.env.get("LOGGING_LEVEL", "debug")
-            }
+            },
             "greeting": os.env.get("GREETING", "Hello world")
          }
 
@@ -140,11 +140,11 @@ Conversely, you might want to provide arguments at registration time, without ad
 
    container.register(Greeter, FileWritingGreeter, path="/tmp/foo", greeting="Hello world")
 
-.. github-only
 Fuller documentation is available on `Read the docs`_.
 
-Github workflows, nox configuration, and linting gratefully stolen from [Hypermodern Python](https://github.com/cjolowicz/cookiecutter-hypermodern-python)
+Github workflows, nox configuration, and linting gratefully stolen from `Hypermodern Python`_
 
 .. _cheese shop: https://pypi.org/project/punq/
 .. _Read the docs: http://punq.readthedocs.io/en/latest/
 .. _Funq: https://github.com/jlyonsmith/Funq
+.. _Hypermodern Python: https://github.com/cjolowicz/cookiecutter-hypermodern-python
