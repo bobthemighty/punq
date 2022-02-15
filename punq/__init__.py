@@ -211,7 +211,8 @@ class _Registry:
             ...
             >>> container.register(
             ...     DataAccessLayer,
-            ...     instance=SqlAlchemyDataAccessLayer(sqlalchemy.create_engine("sqlite:///"))
+            ...     instance=SqlAlchemyDataAccessLayer(
+            ...         sqlalchemy.create_engine("sqlite:///"))
             ... )
             <punq.Container object at 0x...>
         """
