@@ -4,15 +4,39 @@ version = "0.5.1"
 description = "An IOC Container for Python 3.6+"
 authors = ["Bob Gregory <bob@codefiend.co.uk>"]
 license = "MIT"
+homepage = "https://github.com/bobthemighty/punq"
+repository = "https://github.com/bobthemighty/punq"
+documentation = "https://punq.readthedocs.io"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+]
 
 [tool.poetry.dependencies]
 python = "^3.6.2"
+expects = "^0.9.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
 pytest = "^7.0.1"
 pytest-cov = "^3.0.0"
 expects = "^0.9.0"
+xdoctest = {extras = ["colors"], version = "^0.15.10"}
+coverage = {extras = ["toml"], version = "^6.1"}
+flake8 = "^4.0.1"
+flake8-bandit = "^2.1.2"
+flake8-bugbear = "^21.9.2"
+flake8-docstrings = "^1.6.0"
+flake8-rst-docstrings = "^0.2.3"
+pep8-naming = "^0.12.1"
+reorder-python-imports = "^2.6.0"
+
+[tool.coverage.paths]
+source = ["punq", "*/site-packages"]
+tests = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["punq", "tests"]
 
 [build-system]
 requires = [

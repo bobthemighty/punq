@@ -1,13 +1,12 @@
 from typing import List
 
-from expects import expect, have_len
+from expects import expect
+from expects import have_len
 from punq import Container
-from tests.test_dependencies import (
-    MessageSpeaker,
-    MessageWriter,
-    StdoutMessageWriter,
-    TmpFileMessageWriter,
-)
+from tests.test_dependencies import MessageSpeaker
+from tests.test_dependencies import MessageWriter
+from tests.test_dependencies import StdoutMessageWriter
+from tests.test_dependencies import TmpFileMessageWriter
 
 
 def test_can_resolve_a_list_of_dependencies():

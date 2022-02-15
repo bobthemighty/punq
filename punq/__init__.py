@@ -1,11 +1,17 @@
-from typing import Callable, Any, List, get_type_hints, NamedTuple
 import inspect
 from collections import defaultdict
 from enum import Enum
+from typing import Any
+from typing import Callable
+from typing import get_type_hints
+from typing import List
+from typing import NamedTuple
 
-from pkg_resources import DistributionNotFound, get_distribution
+from pkg_resources import DistributionNotFound
+from pkg_resources import get_distribution
 
-from ._compat import is_generic_list, ensure_forward_ref
+from ._compat import ensure_forward_ref
+from ._compat import is_generic_list
 
 try:  # pragma no cover
     __version__ = get_distribution(__name__).version
@@ -143,26 +149,26 @@ class Registry:
     def register_service_and_impl(self, service, scope, impl, resolve_args):
         """Registers a concrete implementation of an abstract service.
 
-           Examples:
-                In this example, the EmailSender type is an abstract class
-                and SmtpEmailSender is our concrete implementation.
+        Examples:
+             In this example, the EmailSender type is an abstract class
+             and SmtpEmailSender is our concrete implementation.
 
-                >>> from punq import Container
-                >>> container = Container()
+             >>> from punq import Container
+             >>> container = Container()
 
-                >>> class EmailSender:
-                ...     def send(self, msg):
-                ...         pass
-                ...
-                >>> class SmtpEmailSender(EmailSender):
-                ...     def send(self, msg):
-                ...         print("Sending message via smtp: " + msg)
-                ...
-                >>> container.register(EmailSender, SmtpEmailSender)
-                <punq.Container object at 0x...>
-                >>> instance = container.resolve(EmailSender)
-                >>> instance.send("Hello")
-                Sending message via smtp: Hello
+             >>> class EmailSender:
+             ...     def send(self, msg):
+             ...         pass
+             ...
+             >>> class SmtpEmailSender(EmailSender):
+             ...     def send(self, msg):
+             ...         print("Sending message via smtp: " + msg)
+             ...
+             >>> container.register(EmailSender, SmtpEmailSender)
+             <punq.Container object at 0x...>
+             >>> instance = container.resolve(EmailSender)
+             >>> instance.send("Hello")
+             Sending message via smtp: Hello
         """
         self.__registrations[service].append(
             Registration(
@@ -201,19 +207,19 @@ class Registry:
     def register_concrete_service(self, service, scope):
         """Register a service as its own implementation.
 
-            Examples:
-                If we need to register a dependency, but we don't need to
-                abstract it, we can register it as concrete.
+        Examples:
+            If we need to register a dependency, but we don't need to
+            abstract it, we can register it as concrete.
 
-                >>> from punq import Container
-                >>> container = Container()
-                >>> class FileReader:
-                ...     def read(self):
-                ...         # Assorted legerdemain and rigmarole
-                ...         pass
-                ...
-                >>> container.register(FileReader)
-                <punq.Container object at 0x...>
+            >>> from punq import Container
+            >>> container = Container()
+            >>> class FileReader:
+            ...     def read(self):
+            ...         # Assorted legerdemain and rigmarole
+            ...         pass
+            ...
+            >>> container.register(FileReader)
+            <punq.Container object at 0x...>
         """
         if not inspect.isclass(service):
             raise InvalidRegistrationException(
@@ -425,8 +431,7 @@ class Container:
         ]
 
     def _build_impl(self, registration, resolution_args, context):
-        """Instantiate the registered service.
-        """
+        """Instantiate the registered service."""
 
         spec = inspect.getfullargspec(registration.builder)
         target_args = spec.args
@@ -499,8 +504,12 @@ class Container:
         Instantiate an unregistered service
         """
         registration = Registration(
-            service_key, Scope.transient, service_key,
-            self.registrations._get_needs_for_ctor(service_key), {})
+            service_key,
+            Scope.transient,
+            service_key,
+            self.registrations._get_needs_for_ctor(service_key),
+            {},
+        )
 
         context = ResolutionContext(service_key, list([registration]))
 

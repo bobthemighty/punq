@@ -9,7 +9,7 @@ def read(*filenames, **kwargs):
     buf = []
 
     for filename in filenames:
-        with io.open(filename, encoding=encoding) as f:
+        with open(filename, encoding=encoding) as f:
             buf.append(f.read())
 
     return sep.join(buf)

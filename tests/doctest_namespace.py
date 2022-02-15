@@ -1,8 +1,8 @@
 import pytest
 
 
-class SQLAlchemy(object):
-    class Engine(object):
+class SQLAlchemy:
+    class Engine:
         """Emulates SQLAlchemy look-a-like in our examples."""
 
 
