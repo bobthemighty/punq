@@ -1,10 +1,7 @@
 Punq
 ====
 
-.. image:: https://travis-ci.org/bobthemighty/punq.svg?branch=master
-      :target: https://travis-ci.org/bobthemighty/punq
-
-.. image:: https://img.shields.io/codecov/c/github/bobthemighty/punq.svg?style=flat
+.. image:: https://codecov.io/gh/bobthemighty/punq/branch/master/graph/badge.svg?token=52hQhaggnk
       :target: https://codecov.io/gh/bobthemighty/punq
 
 .. image:: https://readthedocs.org/projects/punq/badge/?version=latest
