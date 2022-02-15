@@ -146,6 +146,8 @@ Conversely, you might want to provide arguments at registration time, without ad
 .. github-only
 Fuller documentation is available on `Read the docs`_.
 
+Github workflows, nox configuration, and linting gratefully stolen from [Hypermodern Python](https://github.com/cjolowicz/cookiecutter-hypermodern-python)
+
 .. _cheese shop: https://pypi.org/project/punq/
 .. _Read the docs: http://punq.readthedocs.io/en/latest/
 .. _Funq: https://github.com/jlyonsmith/Funq
