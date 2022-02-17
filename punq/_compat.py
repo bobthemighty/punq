@@ -1,4 +1,5 @@
 import sys
+
 from typing import ForwardRef
 
 GenericListClass = list

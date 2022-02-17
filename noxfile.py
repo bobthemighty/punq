@@ -19,7 +19,8 @@ except ImportError:
 
 
 package = "punq"
-python_versions = ["3.10", "3.9", "3.8", "3.7"]
+python_versions = ["3.10", "3.9", "3.8", "3.7", "3.6"]
+LATEST = python_versions[0]
 nox.needs_version = ">= 2021.6.6"
 
 
@@ -48,13 +49,7 @@ def coverage(session: Session) -> None:
     session.run("coverage", *args)
 
 
-@session
-def lint(session):
-    session.install("flake8")
-    session.run("flake8", "--import-order-style", "google")
-
-
-@session(python="3.10")
+@session(python=LATEST)
 def safety(session: Session) -> None:
     """Scan dependencies for insecure packages."""
     requirements = session.poetry.export_requirements()
@@ -62,7 +57,7 @@ def safety(session: Session) -> None:
     session.run("safety", "check", "--full-report", f"--file={requirements}")
 
 
-@session(name="pre-commit", python="3.10")
+@session(name="pre-commit", python=LATEST)
 def precommit(session: Session) -> None:
     """Lint using pre-commit."""
     args = session.posargs or ["run", "--all-files", "--show-diff-on-failure"]
@@ -85,7 +80,7 @@ def precommit(session: Session) -> None:
         activate_virtualenv_in_precommit_hooks(session)
 
 
-@session(python="3.10")
+@session(python=LATEST)
 def safety(session: Session) -> None:
     """Scan dependencies for insecure packages."""
     requirements = session.poetry.export_requirements()
@@ -93,7 +88,7 @@ def safety(session: Session) -> None:
     session.run("safety", "check", "--full-report", f"--file={requirements}")
 
 
-@session(python=python_versions)
+@session(python=LATEST)
 def xdoctest(session: Session) -> None:
     """Run examples with xdoctest."""
     if session.posargs:
