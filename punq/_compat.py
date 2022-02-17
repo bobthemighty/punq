@@ -1,7 +1,13 @@
 import sys
-from typing import ForwardRef
 
-GenericListClass = list
+if sys.version_info >= (3, 7, 0):
+    from typing import ForwardRef
+
+    GenericListClass = list
+else:
+    from typing import List, _ForwardRef as ForwardRef
+
+    GenericListClass = List
 
 
 def is_generic_list(service):
