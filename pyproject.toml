@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "punq"
-version = "0.6.1"
+version = "0.6.2"
 description = "An IOC Container for Python 3.6+"
 authors = ["Bob Gregory <bob@codefiend.co.uk>"]
 license = "MIT"
