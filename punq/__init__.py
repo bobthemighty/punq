@@ -165,7 +165,11 @@ def _match_defaults(args, defaults):
     offset = len(args) - len(defaults)
     defaults = ([None] * offset) + list(defaults)
 
-    return {key: value for key, value in zip(args, defaults) if value is not None}
+    return {
+        key: value
+        for key, value in zip(args, defaults)  # noqa: B905
+        if value is not None
+    }
 
 
 class _Registry:
@@ -277,7 +281,7 @@ class _Registry:
         return existing
 
     def _update_localns(self, service):
-        if type(service) == type:
+        if isinstance(service, type):
             self._localns[service.__name__] = service
         else:
             self._localns[service] = service
