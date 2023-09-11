@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "punq"
-version = "0.6.2"
-description = "An IOC Container for Python 3.6+"
+version = "0.7.0"
+description = "An IOC Container for Python 3.8+"
 authors = ["Bob Gregory <bob@codefiend.co.uk>"]
 license = "MIT"
 homepage = "https://github.com/bobthemighty/punq"
@@ -9,13 +9,13 @@ repository = "https://github.com/bobthemighty/punq"
 documentation = "https://punq.readthedocs.io"
 readme = "README.rst"
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+  "Development Status :: 5 - Production/Stable",
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
+python = "^3.8"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = "^22.1.0"
 pytest = "^7.0.1"
 pytest-cov = "^3.0.0"
@@ -41,7 +41,7 @@ source = ["punq", "tests"]
 
 [build-system]
 requires = [
-    "setuptools >= 35.0.2",
-    "setuptools_scm >= 2.0.0, <3"
+  "setuptools >= 35.0.2",
+  "setuptools_scm >= 2.0.0, <3"
 ]
 build-backend = "setuptools.build_meta"

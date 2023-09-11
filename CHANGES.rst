@@ -1,5 +1,10 @@
 Changelog
 =========
+`0.7.0`_ 2023-09-11
+-------------------
+    Dropped Python3.7 support.
+    
+
 `0.6.0`_ 2022-02-15
 -------------------
     Replaced pipenv and Makefiles on Travis with this Hypermodern gubbins on

@@ -23,16 +23,14 @@ from typing import Callable
 from typing import get_type_hints
 from typing import List
 from typing import NamedTuple
-
-from pkg_resources import DistributionNotFound
-from pkg_resources import get_distribution
+from importlib.metadata import PackageNotFoundError, version
 
 from ._compat import ensure_forward_ref
 from ._compat import is_generic_list
 
 try:  # pragma no cover
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:  # pragma no cover
+    __version__ = version(__name__)
+except PackageNotFoundError:  # pragma no cover
     # package is not installed
     pass
 
