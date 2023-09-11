@@ -30,6 +30,7 @@ flake8-rst-docstrings = "^0.2.3"
 pep8-naming = "^0.12.1"
 reorder-python-imports = "^2.6.0"
 SQLAlchemy = "^1.4.31"
+attrs = "^23.1.0"
 
 [tool.coverage.paths]
 source = ["punq", "*/site-packages"]

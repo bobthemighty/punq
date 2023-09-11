@@ -926,4 +926,4 @@ tests = ["IPython", "cmake", "codecov", "ipykernel", "jupyter-client", "nbconver
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "bd39c339156a45992bd0bc1984493d7ed61b40978c6ba04afcedaec7b431029b"
+content-hash = "95accabcf8004987cc52de88ac6dfb1e0e99ec6d8badc318d07e743cc11ef4ad"
