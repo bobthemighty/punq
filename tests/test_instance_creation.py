@@ -1,13 +1,9 @@
-import os
 from tempfile import NamedTemporaryFile
-from typing import List
 
 import pytest
-from expects import be
 from expects import be_a
 from expects import equal
 from expects import expect
-from expects import have_len
 from punq import Container
 from punq import InvalidRegistrationError
 from punq import MissingDependencyError

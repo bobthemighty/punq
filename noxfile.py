@@ -28,7 +28,7 @@ nox.needs_version = ">= 2021.6.6"
 def tests(session: Session) -> None:
     """Run the test suite."""
     session.install(".")
-    session.install("coverage[toml]", "pytest", "pygments", "expects")
+    session.install("coverage[toml]", "pytest", "pygments", "expects", "attrs")
     try:
         session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
     finally:
