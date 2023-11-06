@@ -19,7 +19,7 @@ except ImportError:
 
 
 package = "punq"
-python_versions = ["3.10", "3.9", "3.8", "3.7", "3.6"]
+python_versions = ["3.11", "3.10", "3.9", "3.8"]
 LATEST = python_versions[0]
 nox.needs_version = ">= 2021.6.6"
 
@@ -28,7 +28,7 @@ nox.needs_version = ">= 2021.6.6"
 def tests(session: Session) -> None:
     """Run the test suite."""
     session.install(".")
-    session.install("coverage[toml]", "pytest", "pygments", "expects")
+    session.install("coverage[toml]", "pytest", "pygments", "expects", "attrs")
     try:
         session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
     finally:
@@ -85,7 +85,15 @@ def safety(session: Session) -> None:
     """Scan dependencies for insecure packages."""
     requirements = session.poetry.export_requirements()
     session.install("safety")
-    session.run("safety", "check", "--full-report", f"--file={requirements}")
+    session.run(
+        "safety",
+        "check",
+        "--full-report",
+        f"--file={requirements}",
+        # sqlachemy is test only dep:
+        "--ignore",
+        "51668",
+    )
 
 
 @session(python=LATEST)

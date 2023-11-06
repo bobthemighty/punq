@@ -1,4 +1,3 @@
-import io
 from pathlib import Path
 
 from setuptools import setup
@@ -27,7 +26,7 @@ setup(
     license="MIT",
     author="Bob Gregory",
     author_email="bob@codefiend.co.uk",
-    description="Unintrusive dependency injection for Python 3.6 +",
+    description="Unintrusive dependency injection for Python 3.8+",
     long_description=long_description,
     packages=["punq"],
     package_data={"punq": ["CHANGES.md"]},
