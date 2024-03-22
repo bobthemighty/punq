@@ -179,7 +179,7 @@ class _Registry:
 
     def _get_needs_for_ctor(self, cls):
         try:
-            return get_type_hints(cls.__init__, None, self._localns)
+            return get_type_hints(cls.__init__, None, self._localns, include_extras=True)
         except NameError as e:
             raise InvalidForwardReferenceError(str(e)) from e
 
