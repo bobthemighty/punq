@@ -7,24 +7,20 @@ Welcome to Punq's documentation!
 ================================
 
 .. contents:
-.. include:: ../../README.rst
+.. include:: ../README.rst
 
 API
 ---
 
 .. autoclass:: punq.Container
     :members:
-    :member-order: bysouce
 
-.. autoexception:: punq.MissingDependencyException
+.. autoexception:: punq.MissingDependencyError
     :members:
-    :member-order: bysouce
 
-.. autoexception:: punq.InvalidRegistrationException
+.. autoexception:: punq.InvalidRegistrationError
     :members:
-    :member-order: bysouce
 
 
-.. autoexception:: punq.InvalidForwardReferenceException
+.. autoexception:: punq.InvalidForwardReferenceError
     :members:
-    :member-order: bysouce

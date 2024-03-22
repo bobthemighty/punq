@@ -1,4 +1,4 @@
-import io
+from pathlib import Path
 
 from setuptools import setup
 
@@ -9,13 +9,14 @@ def read(*filenames, **kwargs):
     buf = []
 
     for filename in filenames:
-        with io.open(filename, encoding=encoding) as f:
+        with open(filename, encoding=encoding) as f:
             buf.append(f.read())
 
     return sep.join(buf)
 
 
-long_description = read("README.rst", "CHANGES.rst")
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.rst").read_text()
 
 setup(
     name="punq",
@@ -25,7 +26,7 @@ setup(
     license="MIT",
     author="Bob Gregory",
     author_email="bob@codefiend.co.uk",
-    description="Unintrusive dependency injection for Python 3.6 +",
+    description="Unintrusive dependency injection for Python 3.8+",
     long_description=long_description,
     packages=["punq"],
     package_data={"punq": ["CHANGES.md"]},

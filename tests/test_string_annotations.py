@@ -7,9 +7,7 @@ The fix is to provide a dict of the previously registered services to the
 get_type_hints function, so that we can resolve forward references to any
 previously registered service.
 """
-
 import attr
-
 import punq
 import pytest
 
@@ -48,7 +46,7 @@ def test_forward_references_must_be_registered_before_their_clients():
     """
     container = punq.Container()
 
-    with pytest.raises(punq.InvalidForwardReferenceException):
+    with pytest.raises(punq.InvalidForwardReferenceError):
         container.register(Client)
 
 

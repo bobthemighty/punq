@@ -1,24 +1,20 @@
-from typing import List
+from tempfile import NamedTemporaryFile
 
 import pytest
-from expects import be, be_a, equal, expect, have_len
-from tempfile import NamedTemporaryFile
-import os
-from punq import (
-    Container,
-    Scope,
-    InvalidRegistrationException,
-    MissingDependencyException,
-)
-from tests.test_dependencies import (
-    FancyDbMessageWriter,
-    HelloWorldSpeaker,
-    MessageSpeaker,
-    MessageWriter,
-    StdoutMessageWriter,
-    TmpFileMessageWriter,
-    WrappingMessageWriter,
-)
+from expects import be_a
+from expects import equal
+from expects import expect
+from punq import Container
+from punq import InvalidRegistrationError
+from punq import MissingDependencyError
+from punq import Scope
+from tests.test_dependencies import FancyDbMessageWriter
+from tests.test_dependencies import HelloWorldSpeaker
+from tests.test_dependencies import MessageSpeaker
+from tests.test_dependencies import MessageWriter
+from tests.test_dependencies import StdoutMessageWriter
+from tests.test_dependencies import TmpFileMessageWriter
+from tests.test_dependencies import WrappingMessageWriter
 
 
 def test_can_create_instance_with_no_dependencies():
@@ -42,7 +38,7 @@ def test_missing_dependencies_raise_exception():
     container = Container()
     container.register(MessageSpeaker, HelloWorldSpeaker)
 
-    with pytest.raises(MissingDependencyException):
+    with pytest.raises(MissingDependencyError):
         container.resolve(MessageSpeaker)
 
 
@@ -109,7 +105,7 @@ def test_registering_an_instance_as_concrete_is_exception():
     container = Container()
     writer = MessageWriter()
 
-    with pytest.raises(InvalidRegistrationException):
+    with pytest.raises(InvalidRegistrationError):
         container.register(writer)
 
 
@@ -121,7 +117,7 @@ def test_registering_an_instance_as_factory_is_exception():
     container = Container()
     writer = MessageWriter()
 
-    with pytest.raises(InvalidRegistrationException):
+    with pytest.raises(InvalidRegistrationError):
         container.register(MessageWriter, writer)
 
 
@@ -134,7 +130,7 @@ def test_registering_a_callable_as_concrete_is_exception():
 
     container = Container()
 
-    with pytest.raises(InvalidRegistrationException):
+    with pytest.raises(InvalidRegistrationError):
         container.register(lambda: "oops")
 
 
@@ -199,6 +195,34 @@ def test_resolve_all_returns_all_registrations_in_order():
     [first, second] = container.resolve_all(MessageWriter)
     expect(first).to(be_a(StdoutMessageWriter))
     expect(second).to(be_a(TmpFileMessageWriter))
+
+
+def test_can_instatiate_with_no_dependencies():
+    container = Container()
+
+    expect(container.instantiate(StdoutMessageWriter)).to(be_a(StdoutMessageWriter))
+
+
+def test_instantiate_dependencies_are_injected():
+    container = Container()
+    container.register(MessageWriter, StdoutMessageWriter)
+    container.register(MessageSpeaker)
+
+    speaker = container.instantiate(HelloWorldSpeaker)
+
+    expect(speaker).to(be_a(HelloWorldSpeaker))
+    expect(speaker.writer).to(be_a(StdoutMessageWriter))
+
+
+def test_can_instantiate_with_a_custom_factory():
+    container = Container()
+    container.register(MessageWriter, lambda: "win")
+    container.register(MessageSpeaker)
+
+    speaker = container.instantiate(HelloWorldSpeaker)
+
+    expect(speaker).to(be_a(HelloWorldSpeaker))
+    expect(speaker.writer).to(equal("win"))
 
 
 def test_can_use_a_string_key():

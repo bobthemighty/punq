@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "punq"
+version = "0.7.0"
+description = "An IOC Container for Python 3.8+"
+authors = ["Bob Gregory <bob@codefiend.co.uk>"]
+license = "MIT"
+homepage = "https://github.com/bobthemighty/punq"
+repository = "https://github.com/bobthemighty/punq"
+documentation = "https://punq.readthedocs.io"
+readme = "README.rst"
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8.1,<4.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.1.0"
+pytest = "^7.0.1"
+pytest-cov = "^3.0.0"
+expects = "^0.9.0"
+xdoctest = {extras = ["colors"], version = "^0.15.10"}
+coverage = {extras = ["toml"], version = "^6.1"}
+flake8 = "^6.1.0"
+flake8-bandit = "^4.1.1"
+flake8-bugbear = "^23.7.10"
+flake8-docstrings = "^1.7.0"
+flake8-rst-docstrings = "^0.3.0"
+pep8-naming = "^0.13.3"
+reorder-python-imports = "^3.10.0"
+SQLAlchemy = "^1.4.31"
+attrs = "^23.1.0"
+
+[tool.coverage.paths]
+source = ["punq", "*/site-packages"]
+tests = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["punq", "tests"]
+
+[build-system]
+requires = [
+  "setuptools >= 35.0.2",
+  "setuptools_scm >= 2.0.0, <3"
+]
+build-backend = "setuptools.build_meta"
