@@ -40,10 +40,12 @@ jobs:
           pip install --constraint=.github/workflows/constraints.txt pip
           pip --version
 
+          pipx --version
           sudo apt update
           sudo apt install pipx
           pipx ensurepath
           sudo pipx ensurepath --global # optional to allow pipx actions with --global argument
+          pipx --version
 
       - name: Upgrade pip in virtual environments
         shell: python
@@ -57,6 +59,7 @@ jobs:
       - name: Install Poetry
         run: |
           pwd
+          # https://github.com/pypa/pipx/pull/1390
           ls  -a ./
           echo "_________________________________________________________"
           ls  -a ./.github/workflows
