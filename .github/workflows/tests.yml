@@ -41,9 +41,8 @@ jobs:
           pip --version
 
           pipx --version
-          sudo apt update
-          sudo apt install pipx
-          pipx ensurepath
+          python3 -m pip install --user pipx
+          python3 -m pipx ensurepath
           sudo pipx ensurepath --global # optional to allow pipx actions with --global argument
           pipx --version
 
