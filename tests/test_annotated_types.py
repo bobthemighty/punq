@@ -7,7 +7,6 @@ from punq import PunqAnnotation
 container = punq.Container()
 
 class Topics(Enum):
-    topic1 = 't1'
     distance = '/distance'
 
 T = TypeVar('T')
