@@ -39,7 +39,13 @@ jobs:
         run: |
           pwd
           ls  -a ./
-          echo "_________"
+          echo "_________________________________________________________"
+          ls  -a ./.github/workflows
+          echo "_________________________________________________________"
+          cat .github/workflows/constraints.txt pip
+          echo "_________________________________________________________"
+
+
           pip install --constraint=.github/workflows/constraints.txt pip
           pip --version
 
