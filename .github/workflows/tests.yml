@@ -37,15 +37,6 @@ jobs:
 
       - name: Upgrade pip
         run: |
-          pwd
-          ls  -a ./
-          echo "_________________________________________________________"
-          ls  -a ./.github/workflows
-          echo "_________________________________________________________"
-          cat .github/workflows/constraints.txt
-          echo "_________________________________________________________"
-
-
           pip install --constraint=.github/workflows/constraints.txt pip
           pip --version
 
@@ -68,7 +59,7 @@ jobs:
           cat .github/workflows/constraints.txt
           echo "_________________________________________________________"
 
-          pipx install --pip-args=--constraint=./.github/workflows/constraints.txt poetry
+          pipx install poetry
           poetry --version
 
       - name: Install Nox
