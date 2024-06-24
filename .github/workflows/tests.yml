@@ -38,7 +38,7 @@ jobs:
       - name: Upgrade pip
         run: |
           pwd
-          ls  ./
+          ls  -a ./
           echo "_________"
           pip install --constraint=.github/workflows/constraints.txt pip
           pip --version
