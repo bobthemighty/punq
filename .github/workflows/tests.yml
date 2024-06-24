@@ -40,6 +40,11 @@ jobs:
           pip install --constraint=.github/workflows/constraints.txt pip
           pip --version
 
+          sudo apt update
+          sudo apt install pipx
+          pipx ensurepath
+          sudo pipx ensurepath --global # optional to allow pipx actions with --global argument
+
       - name: Upgrade pip in virtual environments
         shell: python
         run: |
