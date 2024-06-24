@@ -42,7 +42,7 @@ jobs:
           echo "_________________________________________________________"
           ls  -a ./.github/workflows
           echo "_________________________________________________________"
-          cat .github/workflows/constraints.txt pip
+          cat .github/workflows/constraints.txt
           echo "_________________________________________________________"
 
 
