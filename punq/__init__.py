@@ -191,7 +191,7 @@ class _Registry:
             type_hints = {}
             for kwarg_name, type_hint in annotated_type_hints.items():   
                 
-                if len(type_hint.__metadata__) > 0 and type_hint.__metadata__[0] == PunqAnnotation:
+                if len(type_hint.get('__metadata__', [])) > 0 and type_hint.__metadata__[0] == PunqAnnotation:
                    type_hints[kwarg_name] = type_hint
                 else:
                    # if an annotation is not intended for  punq strip the annotation                  
