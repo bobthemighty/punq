@@ -24,7 +24,7 @@ from typing import get_type_hints
 from typing import List
 from typing import NamedTuple
 from importlib.metadata import PackageNotFoundError, version
-from typing_extensions import get_args
+from typing_extensions import _AnnotatedAlias, get_args
 
 from ._compat import ensure_forward_ref
 from ._compat import is_generic_list
@@ -190,8 +190,7 @@ class _Registry:
 
             type_hints = {}
             for kwarg_name, type_hint in annotated_type_hints.items():   
-                
-                if len(type_hint.get('__metadata__', [])) > 0 and type_hint.__metadata__[0] == PunqAnnotation:
+                if isinstance(type_hint, _AnnotatedAlias) and len(type_hint.__metadata__) > 0 and type_hint.__metadata__[0] == PunqAnnotation:
                    type_hints[kwarg_name] = type_hint
                 else:
                    # if an annotation is not intended for  punq strip the annotation                  
