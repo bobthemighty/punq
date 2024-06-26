@@ -190,7 +190,7 @@ class _Registry:
 
             type_hints = {}
             for kwarg_name, type_hint in annotated_type_hints.items():   
-                if isinstance(type_hint, _AnnotatedAlias) and len(type_hint.__metadata__) > 0 and type_hint.__metadata__[0] == PunqAnnotation:
+                if get_origin(type_hint) is Annotated and len(type_hint.__metadata__) > 0 and type_hint.__metadata__[0] == PunqAnnotation:
                    type_hints[kwarg_name] = type_hint
                 else:
                    # if an annotation is not intended for  punq strip the annotation                  

@@ -22,10 +22,13 @@ class Test:
         temp_sub: Annotated[Subscriber[float], PunqAnnotation, '/topic/temp'],
         dist_sub: Annotated[Subscriber[float], PunqAnnotation, Topics.distance],
         param1: Annotated[int, 'an annotation that is not for punq'],
+        param2: int
     ):
         self.temp_sub: Subscriber[float] = temp_sub
         self.dist_sub: Subscriber[float] = dist_sub
         self.param1 = param1
+        self.param2 = param2
+
 
 def test_annotated_types():
     temp_sub = Subscriber(float, '/topic/temp')
@@ -43,6 +46,8 @@ def test_annotated_types():
 
     assert test.dist_sub.topic == '/topic/dist'
     assert test.param1 == 88
+    assert test.param2 == 88
+
 
 
 test_annotated_types()
