@@ -32,7 +32,7 @@ def test_annotated_types():
     container.register(Annotated[Subscriber[float], PunqAnnotation, '/topic/temp'], instance=temp_sub)
 
     dist_sub = Subscriber(float, '/topic/dist')
-    container.register(Annotated[Subscriber[float], PunqAnnotation, Topics.topic1], instance=dist_sub)
+    container.register(Annotated[Subscriber[float], PunqAnnotation, Topics.distance], instance=dist_sub)
 
     container.register(int, instance=88)
 
@@ -43,3 +43,6 @@ def test_annotated_types():
 
     assert test.dist_sub.topic == '/topic/dist'
     assert test.param1 == 88
+
+
+test_annotated_types()
