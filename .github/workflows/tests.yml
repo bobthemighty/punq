@@ -40,12 +40,6 @@ jobs:
           pip install --constraint=.github/workflows/constraints.txt pip
           pip --version
 
-          pipx --version
-          python3 -m pip install --user pipx
-          python3 -m pipx ensurepath
-          sudo pipx ensurepath --global # optional to allow pipx actions with --global argument
-          pipx --version
-
       - name: Upgrade pip in virtual environments
         shell: python
         run: |
@@ -57,16 +51,7 @@ jobs:
 
       - name: Install Poetry
         run: |
-          pwd
-          # https://github.com/pypa/pipx/pull/1390
-          ls  -a ./
-          echo "_________________________________________________________"
-          ls  -a ./.github/workflows
-          echo "_________________________________________________________"
-          cat .github/workflows/constraints.txt
-          echo "_________________________________________________________"
-
-          pipx install poetry
+          pipx install --pip-args=--constraint=.github/workflows/constraints.txt poetry
           poetry --version
 
       - name: Install Nox
