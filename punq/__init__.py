@@ -18,12 +18,13 @@ Misc Variables:
 import inspect
 from collections import defaultdict
 from enum import Enum
-from typing import Any
+from typing import Annotated, Any, Generic, TypeVar, get_origin
 from typing import Callable
 from typing import get_type_hints
 from typing import List
 from typing import NamedTuple
 from importlib.metadata import PackageNotFoundError, version
+from typing_extensions import _AnnotatedAlias, get_args
 
 from ._compat import ensure_forward_ref
 from ._compat import is_generic_list
@@ -152,6 +153,11 @@ class _Empty:
 empty = _Empty()
 
 
+T = TypeVar("T")
+
+class PunqAnnotation():
+    pass
+
 def _match_defaults(args, defaults):
     """Matches args with their defaults in the result of getfullargspec.
 
@@ -179,7 +185,17 @@ class _Registry:
 
     def _get_needs_for_ctor(self, cls):
         try:
-            return get_type_hints(cls.__init__, None, self._localns)
+            annotated_type_hints = get_type_hints(cls.__init__, None, self._localns, include_extras=True)
+            non_annotated_type_hints = get_type_hints(cls.__init__, None, self._localns)
+
+            type_hints = {}
+            for kwarg_name, type_hint in annotated_type_hints.items():   
+                if get_origin(type_hint) is Annotated and len(type_hint.__metadata__) > 0 and type_hint.__metadata__[0] == PunqAnnotation:
+                   type_hints[kwarg_name] = type_hint
+                else:
+                   # if an annotation is not intended for  punq strip the annotation                  
+                   type_hints[kwarg_name] = non_annotated_type_hints[kwarg_name]
+            return type_hints
         except NameError as e:
             raise InvalidForwardReferenceError(str(e)) from e
 
