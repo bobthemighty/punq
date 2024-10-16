@@ -9,3 +9,4 @@
 /src/*.egg-info/
 __pycache__/
 .eggs
+.idea
