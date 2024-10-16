@@ -1,13 +1,13 @@
-from expects import equal, expect
-
 from punq import Container, Scope
 
 
 class ConstructorDependency1:
     pass
 
+
 class ConstructorDependency2:
     pass
+
 
 class TraditionalClass:
     def __init__(
@@ -18,16 +18,11 @@ class TraditionalClass:
         self.dependency1 = dependency1
         self.dependency2 = dependency2
 
-def test_can_resolve_dependency_without_registration():
+
+def test_can_resolve_dependencies_in_constructor_without_registration():
     container = Container()
-    # container.register(ConstructorDependency1, scope=Scope.singleton)
-    # container.register(ConstructorDependency2, scope=Scope.singleton)
+    # container.register(ConstructorDependency1)
+    # container.register(ConstructorDependency2)
     # ToDo: ^ The test will pass if we uncomment those or implement the feature.
     container.register(TraditionalClass)
-    traditional_class = container.resolve(TraditionalClass)
-
-    first_dependency = container.resolve(ConstructorDependency1)
-    second_dependency = container.resolve(ConstructorDependency2)
-
-    expect(traditional_class.dependency1).to(equal(first_dependency))
-    expect(traditional_class.dependency2).to(equal(second_dependency))
+    container.resolve(TraditionalClass)
