@@ -312,6 +312,8 @@ class _ResolutionTarget:
         if len(self.impls) > 0:
             return self.impls.pop()
 
+    def __str__(self):
+        return f"ResolutionTarget({self.service}, {self.impls})"
 
 class _ResolutionContext:
     def __init__(self, key, impls):
@@ -484,11 +486,13 @@ class Container:
             return context[service_key]
 
         target = context.target(service_key)
+        print(target)
 
         if target.is_generic_list():
             return self.resolve_all(target.generic_parameter)
 
         registration = target.next_impl()
+        print(registration)
 
         if registration is None and default is not None:
             return default
