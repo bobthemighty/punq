@@ -312,9 +312,6 @@ class _ResolutionTarget:
         if len(self.impls) > 0:
             return self.impls.pop()
 
-    def __str__(self):
-        return f"ResolutionTarget({self.service}, {self.impls})"
-
 
 class _ResolutionContext:
     def __init__(self, key, impls):
