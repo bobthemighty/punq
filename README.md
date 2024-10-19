@@ -6,7 +6,6 @@
 [![Commit activity](https://img.shields.io/github/commit-activity/m/bobthemighty/punq)](https://img.shields.io/github/commit-activity/m/bobthemighty/punq)
 [![License](https://img.shields.io/github/license/bobthemighty/punq)](https://img.shields.io/github/license/bobthemighty/punq)
 
-
 <!-- quick_start -->
 
 An unintrusive library for dependency injection in modern Python.
