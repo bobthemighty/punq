@@ -156,20 +156,24 @@ class _Empty:
 empty = _Empty()
 
 
-def _match_defaults(args, defaults):
+def _match_defaults(spec):
     """Matches args with their defaults in the result of getfullargspec.
 
     inspect.getfullargspec returns a complex object that includes the defaults
     on args and kwonly args. This function takes a list of args, and a tuple of
     the last N defaults and returns a dict of args to defaults.
     """
-    if defaults is None:
-        return {}
+    ns = {}
+    if spec.defaults is not None:
+        offset = len(spec.args) - len(spec.defaults)
+        defaults = ([None] * offset) + list(spec.defaults)
 
-    offset = len(args) - len(defaults)
-    defaults = ([None] * offset) + list(defaults)
+        ns = {key: value for key, value in zip(spec.args, defaults) if value is not None}
 
-    return {key: value for key, value in zip(args, defaults) if value is not None}
+    if spec.kwonlydefaults is not None:
+        ns.update(spec.kwonlydefaults)
+
+    return ns
 
 
 class _Registry:
@@ -239,7 +243,7 @@ class _Registry:
         """
         self.__registrations[service].append(_Registration(service, Scope.singleton, lambda: instance, {}, {}))
 
-    def register_concrete_service(self, service, scope):
+    def register_concrete_service(self, service, scope, resolve_args=None):
         """Register a service as its own implementation.
 
         Examples:
@@ -259,7 +263,7 @@ class _Registry:
         if not inspect.isclass(service):
             raise InvalidSelfRegistrationError(service)
         self.__registrations[service].append(
-            _Registration(service, scope, service, self._get_needs_for_ctor(service), {})
+            _Registration(service, scope, service, self._get_needs_for_ctor(service), resolve_args or {})
         )
 
     def build_context(self, key, existing=None):
@@ -283,7 +287,7 @@ class _Registry:
         if instance is not empty:
             self.register_service_and_instance(service, instance)
         elif factory is empty:
-            self.register_concrete_service(service, scope)
+            self.register_concrete_service(service, scope, resolve_args)
         elif callable(factory):
             self.register_service_and_impl(service, scope, factory, resolve_args)
         else:
@@ -450,9 +454,9 @@ class Container:
     def _build_impl(self, registration, resolution_args, context):
         """Instantiate the registered service."""
         spec = inspect.getfullargspec(registration.builder)
-        target_args = spec.args
+        target_args = spec.args + spec.kwonlyargs
 
-        args = _match_defaults(spec.args, spec.defaults)
+        args = _match_defaults(spec)
         args.update({
             k: self._resolve_impl(v, resolution_args, context, args.get(k))
             for k, v in registration.needs.items()
