@@ -735,7 +735,7 @@ wheels = [
 
 [[package]]
 name = "punq"
-version = "0.0.1"
+version = "0.7.1"
 source = { editable = "." }
 
 [package.dev-dependencies]
