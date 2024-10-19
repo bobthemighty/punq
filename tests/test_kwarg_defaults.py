@@ -1,5 +1,5 @@
-from expects import equal
-from expects import expect
+from expects import equal, expect
+
 from punq import Container
 
 

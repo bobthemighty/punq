@@ -7,9 +7,11 @@ The fix is to provide a dict of the previously registered services to the
 get_type_hints function, so that we can resolve forward references to any
 previously registered service.
 """
+
 import attr
-import punq
 import pytest
+
+import punq
 
 
 @attr.s(auto_attribs=True)
