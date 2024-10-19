@@ -1,0 +1,60 @@
+site_name: punq
+repo_url: https://github.com/bobthemighty/punq
+site_url: https://bobthemighty.github.io/punq
+site_description: An IOC Container for Python 3.8+
+site_author: Bob Gregory
+edit_uri: edit/main/docs/
+repo_name: bobthemighty/punq
+copyright: Maintained by <a href="https://bobthemighty.com">Bob</a>.
+
+nav:
+  - Home: index.md
+  - Modules: modules.md
+plugins:
+  - include-markdown
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [punq]
+theme:
+  name: material
+  feature:
+    tabs: true
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/bobthemighty/punq
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/punq
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences

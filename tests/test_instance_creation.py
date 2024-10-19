@@ -1,20 +1,18 @@
 from tempfile import NamedTemporaryFile
 
 import pytest
-from expects import be_a
-from expects import equal
-from expects import expect
-from punq import Container
-from punq import InvalidRegistrationError
-from punq import MissingDependencyError
-from punq import Scope
-from tests.test_dependencies import FancyDbMessageWriter
-from tests.test_dependencies import HelloWorldSpeaker
-from tests.test_dependencies import MessageSpeaker
-from tests.test_dependencies import MessageWriter
-from tests.test_dependencies import StdoutMessageWriter
-from tests.test_dependencies import TmpFileMessageWriter
-from tests.test_dependencies import WrappingMessageWriter
+from expects import be_a, equal, expect
+
+from punq import Container, InvalidRegistrationError, MissingDependencyError, Scope
+from tests.test_dependencies import (
+    FancyDbMessageWriter,
+    HelloWorldSpeaker,
+    MessageSpeaker,
+    MessageWriter,
+    StdoutMessageWriter,
+    TmpFileMessageWriter,
+    WrappingMessageWriter,
+)
 
 
 def test_can_create_instance_with_no_dependencies():

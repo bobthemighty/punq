@@ -1,50 +1,52 @@
-from expects import equal
-from expects import expect
+from typing import Protocol
+
+from expects import equal, expect
+
 from punq import Container
 
 
-class Filter:
-    pass
+class Filter(Protocol):
+    def match(self, val) -> bool: ...
 
 
 class Is_A(Filter):
-    def __init__(self, next: Filter, spy):
+    def __init__(self, successor: Filter, spy):
         self.spy = spy
-        self.next = next
+        self.successor = successor
 
-    def match(self, input):
+    def match(self, val):
         self.spy.append("is_a")
 
-        return input == "A" or self.next.match(input)
+        return input == "A" or self.successor.match(input)
 
 
 class Is_B(Filter):
-    def __init__(self, next: Filter, spy):
+    def __init__(self, successor: Filter, spy):
         self.spy = spy
-        self.next = next
+        self.successor = successor
 
-    def match(self, input):
+    def match(self, val):
         self.spy.append("is_b")
 
-        return input == "B" or self.next.match(input)
+        return input == "B" or self.successor.match(input)
 
 
 class Is_C(Filter):
-    def __init__(self, next: Filter, spy):
+    def __init__(self, successor: Filter, spy):
         self.spy = spy
-        self.next = next
+        self.successor = successor
 
-    def match(self, input):
+    def match(self, val):
         self.spy.append("is_c")
 
-        return input == "C" or self.next.match(input)
+        return input == "C" or self.successor.match(input)
 
 
 class NullFilter(Filter):
     def __init__(self, spy):
         self.spy = spy
 
-    def match(self, input):
+    def match(self, val):
         self.spy.append("null")
 
         return False
@@ -65,7 +67,7 @@ def test_can_resolve_a_chain_of_dependencies():
     container.register(Filter, Is_B, spy=spy)
     container.register(Filter, Is_A, spy=spy)
 
-    filter = container.resolve(Filter)
-    filter.match("D")
+    f = container.resolve(Filter)
+    f.match("D")
 
     expect(spy).to(equal(["is_a", "is_b", "is_c", "null"]))

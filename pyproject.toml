@@ -1,48 +1,120 @@
-[tool.poetry]
+[project]
 name = "punq"
-version = "0.7.0"
+version = "0.7.1"
 description = "An IOC Container for Python 3.8+"
-authors = ["Bob Gregory <bob@codefiend.co.uk>"]
-license = "MIT"
-homepage = "https://github.com/bobthemighty/punq"
-repository = "https://github.com/bobthemighty/punq"
-documentation = "https://punq.readthedocs.io"
-readme = "README.rst"
+authors = [{ name = "Bob Gregory", email = "bob@codefiend.co.uk" }]
+readme = "README.md"
+keywords = ['python']
+requires-python = ">=3.9,<4.0"
 classifiers = [
-  "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.8.1,<4.0"
+[project.urls]
+Homepage = "https://bobthemighty.github.io/punq/"
+Repository = "https://github.com/bobthemighty/punq"
+Documentation = "https://bobthemighty.github.io/punq/"
 
-[tool.poetry.group.dev.dependencies]
-black = "^22.1.0"
-pytest = "^7.0.1"
-pytest-cov = "^3.0.0"
-expects = "^0.9.0"
-xdoctest = {extras = ["colors"], version = "^0.15.10"}
-coverage = {extras = ["toml"], version = "^6.1"}
-flake8 = "^6.1.0"
-flake8-bandit = "^4.1.1"
-flake8-bugbear = "^23.7.10"
-flake8-docstrings = "^1.7.0"
-flake8-rst-docstrings = "^0.3.0"
-pep8-naming = "^0.13.3"
-reorder-python-imports = "^3.10.0"
-SQLAlchemy = "^1.4.31"
-attrs = "^23.1.0"
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.2.0",
+    "pre-commit>=2.20.0",
+    "tox-uv>=1.11.3",
+    "deptry>=0.20.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.6.9",
+    "mkdocs>=1.4.2",
+    "mkdocs-material>=8.5.10",
+    "mkdocstrings[python]>=0.26.1",
+    "expects>=0.9.0",
+    "sqlalchemy>=2.0.36",
+    "attrs>=24.2.0",
+    "mkdocs-include-markdown-plugin>=6.2.2",
+    "xdoctest>=1.2.0",
+]
 
-[tool.coverage.paths]
-source = ["punq", "*/site-packages"]
-tests = ["tests"]
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.mypy]
+files = ["punq"]
+disallow_untyped_defs = true
+disallow_any_unimported = true
+no_implicit_optional = true
+check_untyped_defs = true
+warn_return_any = true
+warn_unused_ignores = true
+show_error_codes = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+fix = true
+
+[tool.ruff.lint]
+select = [
+    # flake8-2020
+    "YTT",
+    # flake8-bandit
+    "S",
+    # flake8-bugbear
+    "B",
+    # flake8-builtins
+    "A",
+    # flake8-comprehensions
+    "C4",
+    # flake8-debugger
+    "T10",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    # mccabe
+    "C90",
+    # pycodestyle
+    "E", "W",
+    # pyflakes
+    "F",
+    # pygrep-hooks
+    "PGH",
+    # pyupgrade
+    "UP",
+    # ruff
+    "RUF",
+    # tryceratops
+    "TRY",
+]
+ignore = [
+    # LineTooLong
+    "E501",
+    # DoNotAssignLambda
+    "E731",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.ruff.format]
+preview = true
+
+[tool.coverage.report]
+skip_empty = true
 
 [tool.coverage.run]
 branch = true
-source = ["punq", "tests"]
+source = ["punq"]
 
-[build-system]
-requires = [
-  "setuptools >= 35.0.2",
-  "setuptools_scm >= 2.0.0, <3"
-]
-build-backend = "setuptools.build_meta"
+[tool.setuptools.packages.find]
+exclude = ['site']
