@@ -148,9 +148,6 @@ class _Registration(NamedTuple):
     needs: Any
     args: list[Any]
 
-    def __str__(self):
-        return f"Registration <{self.service}>"
-
 
 class _Empty:
     pass
@@ -314,9 +311,6 @@ class _ResolutionTarget:
     def next_impl(self):
         if len(self.impls) > 0:
             return self.impls.pop()
-
-    def __str__(self):
-        return f"ResolutionTarget {self.service}, (impls: {self.impls})"
 
 
 class _ResolutionContext:
