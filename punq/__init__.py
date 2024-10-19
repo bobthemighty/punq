@@ -162,15 +162,21 @@ def _match_defaults(spec):
     inspect.getfullargspec returns a complex object that includes the defaults
     on args and kwonly args. This function takes a list of args, and a tuple of
     the last N defaults and returns a dict of args to defaults.
+
+    These defaults are passed to _resolve_impl when building a needed dependency
+    and used when a registration is missing.
     """
     ns = {}
     if spec.defaults is not None:
+        # Defaults for args are just a tuple. We match args with their defaults
+        # by position, starting at the first defaulted arg
         offset = len(spec.args) - len(spec.defaults)
         defaults = ([None] * offset) + list(spec.defaults)
 
         ns = {key: value for key, value in zip(spec.args, defaults) if value is not None}
 
     if spec.kwonlydefaults is not None:
+        # defaults for kwargs are in a dict, so we just update the result dict.
         ns.update(spec.kwonlydefaults)
 
     return ns
