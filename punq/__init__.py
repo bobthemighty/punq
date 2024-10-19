@@ -529,7 +529,7 @@ class Container:
         return self._build_impl(registration, kwargs, context)
 
     def resolve(self, service_key, **kwargs):
-        """Build an return an instance of a registered service."""
+        """Build and return an instance of a registered service."""
         context = self.registrations.build_context(service_key)
 
         return self._resolve_impl(service_key, kwargs, context)
