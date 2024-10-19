@@ -244,7 +244,7 @@ class _Registry:
         """
         self.__registrations[service].append(_Registration(service, Scope.singleton, lambda: instance, {}, {}))
 
-    def register_concrete_service(self, service, scope):
+    def register_concrete_service(self, service, scope, resolve_args=None):
         """Register a service as its own implementation.
 
         Examples:
@@ -264,7 +264,7 @@ class _Registry:
         if not inspect.isclass(service):
             raise InvalidSelfRegistrationError(service)
         self.__registrations[service].append(
-            _Registration(service, scope, service, self._get_needs_for_ctor(service), {})
+            _Registration(service, scope, service, self._get_needs_for_ctor(service), resolve_args or {})
         )
 
     def build_context(self, key, existing=None):
@@ -288,7 +288,7 @@ class _Registry:
         if instance is not empty:
             self.register_service_and_instance(service, instance)
         elif factory is empty:
-            self.register_concrete_service(service, scope)
+            self.register_concrete_service(service, scope, resolve_args)
         elif callable(factory):
             self.register_service_and_impl(service, scope, factory, resolve_args)
         else:
@@ -458,7 +458,6 @@ class Container:
         target_args = spec.args + spec.kwonlyargs
 
         args = _match_defaults(spec)
-        print(args)
         args.update({
             k: self._resolve_impl(v, resolution_args, context, args.get(k))
             for k, v in registration.needs.items()

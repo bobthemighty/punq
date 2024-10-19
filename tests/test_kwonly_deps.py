@@ -34,6 +34,12 @@ class ReverseParser:
         return val[::-1]
 
 
+class IdentityParser:
+
+    def parse(self, val) -> str:
+        return val
+
+
 def test_can_resolve_with_kwonlyargs():
 
     container = punq.Container()
@@ -49,3 +55,20 @@ def test_can_resolve_with_kwonlyargs():
     otherdoer.do("dlrow olleh")
 
     assert result == ["Barry: dlrow olleh", "Tom: hello world"]
+
+
+def test_can_register_with_kwonlyargs():
+
+    container = punq.Container()
+    result = []
+    container.register(Parser, ReverseParser)
+    container.register(Writer, instance=ListWriter(result))
+    container.register(Doer, name="Frodo")
+
+    doer = container.resolve(Doer)
+    doer.do("hello world")
+
+    otherdoer = container.resolve(Doer, name="Bilbo", p=IdentityParser())
+    otherdoer.do("hello world")
+
+    assert result == ["Frodo: dlrow olleh", "Bilbo: hello world"]
