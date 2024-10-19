@@ -2,8 +2,10 @@
 
 [![Release](https://img.shields.io/github/v/release/bobthemighty/punq)](https://img.shields.io/github/v/release/bobthemighty/punq)
 [![Build status](https://img.shields.io/github/actions/workflow/status/bobthemighty/punq/main.yml?branch=main)](https://github.com/bobthemighty/punq/actions/workflows/main.yml?query=branch%3Amain)
+[![Tests](https://codecov.io/github/bobthemighty/punq/graph/badge.svg?token=52hQhaggnk)](https://codecov.io/github/bobthemighty/punq)
 [![Commit activity](https://img.shields.io/github/commit-activity/m/bobthemighty/punq)](https://img.shields.io/github/commit-activity/m/bobthemighty/punq)
 [![License](https://img.shields.io/github/license/bobthemighty/punq)](https://img.shields.io/github/license/bobthemighty/punq)
+
 
 <!-- quick_start -->
 
