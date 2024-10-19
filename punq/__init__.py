@@ -496,9 +496,6 @@ class Container:
         if registration is None:
             raise MissingDependencyError("Failed to resolve implementation for " + str(service_key))
 
-        if service_key in registration.needs.values():
-            self._resolve_impl(service_key, kwargs, context)
-
         return self._build_impl(registration, kwargs, context)
 
     def resolve(self, service_key, **kwargs):
