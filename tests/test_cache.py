@@ -6,9 +6,11 @@ import punq
 class SomeVeryHeavyDep:
     pass
 
+
 class SubSystemA:
     def __init__(self, d: SomeVeryHeavyDep):
         self.dep = d
+
 
 class SubSystemB:
     def __init__(self, d: SomeVeryHeavyDep):
@@ -19,6 +21,7 @@ class Root:
     def __init__(self, a: SubSystemA, b: SubSystemB):
         self.a = a
         self.b = b
+
 
 def test_that_repeated_resolutions_are_cached():
     """
