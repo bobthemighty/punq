@@ -46,9 +46,11 @@ jobs:
       - name: Run tests
         run: uv run python -m pytest tests --cov --cov-config=pyproject.toml --cov-report=xml
 
-      - name: Upload coverage reports to Codecov with GitHub Action on Python 3.11
+      - name: Upload coverage reports to Codecov with GitHub Action on Python 3.12
         uses: codecov/codecov-action@v4
-        if: ${{ matrix.python-version == '3.11' }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+        if: ${{ matrix.python-version == '3.12' }}
 
   check-docs:
     runs-on: ubuntu-latest
