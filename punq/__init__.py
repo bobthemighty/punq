@@ -165,7 +165,6 @@ def _match_defaults(spec):
     """
     ns = {}
     if spec.defaults is not None:
-
         offset = len(spec.args) - len(spec.defaults)
         defaults = ([None] * offset) + list(spec.defaults)
 
