@@ -156,20 +156,25 @@ class _Empty:
 empty = _Empty()
 
 
-def _match_defaults(args, defaults):
+def _match_defaults(spec):
     """Matches args with their defaults in the result of getfullargspec.
 
     inspect.getfullargspec returns a complex object that includes the defaults
     on args and kwonly args. This function takes a list of args, and a tuple of
     the last N defaults and returns a dict of args to defaults.
     """
-    if defaults is None:
-        return {}
+    ns = {}
+    if spec.defaults is not None:
 
-    offset = len(args) - len(defaults)
-    defaults = ([None] * offset) + list(defaults)
+        offset = len(spec.args) - len(spec.defaults)
+        defaults = ([None] * offset) + list(spec.defaults)
 
-    return {key: value for key, value in zip(args, defaults) if value is not None}
+        ns = {key: value for key, value in zip(spec.args, defaults) if value is not None}
+
+    if spec.kwonlydefaults is not None:
+        ns.update(spec.kwonlydefaults)
+
+    return ns
 
 
 class _Registry:
@@ -450,9 +455,10 @@ class Container:
     def _build_impl(self, registration, resolution_args, context):
         """Instantiate the registered service."""
         spec = inspect.getfullargspec(registration.builder)
-        target_args = spec.args
+        target_args = spec.args + spec.kwonlyargs
 
-        args = _match_defaults(spec.args, spec.defaults)
+        args = _match_defaults(spec)
+        print(args)
         args.update({
             k: self._resolve_impl(v, resolution_args, context, args.get(k))
             for k, v in registration.needs.items()
