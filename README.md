@@ -23,7 +23,7 @@ Punq is available on the [cheese shop][2]
 pip install punq
 ```
 
-Documentation is available on [Read the docs][3].
+Documentation is available on [Github pages][3].
 
 ## Quick Start
 
@@ -140,11 +140,11 @@ container.register(Greeter, FileWritingGreeter, path="/tmp/foo", greeting="Hello
 
 [1]: https://github.com/jlyonsmith/Funq
 [2]: https://pypi.org/project/punq/
-[3]: http://punq.readthedocs.io/en/latest
+[3]: https://bobthemighty.github.io/punq/
 [4]: https://github.com/fpgmaas/cookiecutter-uv
 
 <!-- end_quick_start -->
 
-Fuller documentation is available on [Read the docs][3]
+Fuller documentation is available on [Github pages][3]
 
 Github workflows, nox configuration, and linting gratefully stolen from [CookieCutter UV][4]
