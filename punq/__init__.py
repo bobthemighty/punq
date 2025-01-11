@@ -128,6 +128,30 @@ class InvalidForwardReferenceError(InvalidForwardReferenceException):
 
     pass
 
+class RegistrationScope:
+
+    def __init__(self, parent=None):
+        self.parent = parent
+        self.entries = defaultdict(list)
+
+    def child(self):
+        return RegistrationScope(self)
+
+    def append(self, key, value):
+        self.entries[key].append(value)
+
+    def __get(self, key, result):
+        if self.parent:
+            self.parent.__get(key, result)
+        for elem in self.entries[key]:
+            result.append(elem)
+        return result
+
+    def get(self, key):
+        return self.__get(key, [])
+
+
+
 
 class Scope(Enum):
     """Controls the lifetime of resolved objects.
@@ -184,7 +208,10 @@ def _match_defaults(spec):
 
 class _Registry:
     def __init__(self, parent=None):
-        self.__registrations = ChainMap(parent or defaultdict(list))
+        if not parent:
+            self.__registrations = RegistrationScope()
+        else:
+            self.__registrations = parent.__registrations.child()
         self._localns = {}
 
     def _get_needs_for_ctor(self, cls):
@@ -217,7 +244,8 @@ class _Registry:
              >>> instance.send("Hello")
              Sending message via smtp: Hello
         """
-        self.__registrations[service].append(
+        self.__registrations.append(
+            service,
             _Registration(service, scope, impl, self._get_needs_for_ctor(impl), resolve_args)
         )
 
@@ -247,7 +275,7 @@ class _Registry:
             ... )
             <punq.Container object at 0x...>
         """
-        self.__registrations[service].append(_Registration(service, Scope.singleton, lambda: instance, {}, {}))
+        self.__registrations.append(service, _Registration(service, Scope.singleton, lambda: instance, {}, {}))
 
     def register_concrete_service(self, service, scope, resolve_args=None):
         """Register a service as its own implementation.
@@ -268,16 +296,17 @@ class _Registry:
         """
         if not inspect.isclass(service):
             raise InvalidSelfRegistrationError(service)
-        self.__registrations[service].append(
+        self.__registrations.append(
+            service,
             _Registration(service, scope, service, self._get_needs_for_ctor(service), resolve_args or {})
         )
 
     def build_context(self, key, existing=None):
         if existing is None:
-            return _ResolutionContext(key, list(self.__getitem__(key)))
+            return _ResolutionContext(key, self.__registrations.get(key))
 
         if key not in existing.targets:
-            existing.targets[key] = _ResolutionTarget(key, list(self.__getitem__(key)))
+            existing.targets[key] = _ResolutionTarget(key, self.__registrations.get(key))
 
         return existing
 
@@ -303,7 +332,7 @@ class _Registry:
         ensure_forward_ref(self, service, factory, instance, **kwargs)
 
     def __getitem__(self, service):
-        return self.__registrations[service]
+        return self.__registrations.get(service)
 
 
 class _ResolutionTarget:
@@ -352,8 +381,9 @@ class Container:
     will only need to interact with this class.
     """
 
-    def __init__(self):
-        self.registrations = _Registry()
+    def __init__(self, registrations=None):
+        self.registrations = _Registry(registrations)
+        print(self.registrations)
         self.register(Container, instance=self)
         self._singletons = {}
 
@@ -510,7 +540,10 @@ class Container:
 
     def resolve(self, service_key, **kwargs):
         """Build and return an instance of a registered service."""
+        print(self.registrations)
         context = self.registrations.build_context(service_key)
+        for k in context.targets:
+            print(k, context.targets[k].impls)
 
         return self._resolve_impl(service_key, kwargs, context)
 
@@ -527,3 +560,6 @@ class Container:
         context = _ResolutionContext(service_key, [registration])
 
         return self._build_impl(registration, kwargs, context)
+
+    def child(self):
+        return Container(self.registrations)
