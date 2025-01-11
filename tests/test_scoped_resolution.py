@@ -107,3 +107,28 @@ def test_when_inheriting_a_singleton_instance():
 
     assert parent.resolve(MessageWriter).connection_string == "hello"
     assert child.resolve(MessageWriter).connection_string == "hello"
+
+
+ContextBag = dict
+
+class ThingDoer:
+
+    def __init__(self, context: ContextBag):
+        self.context = context
+
+def test_when_registering_a_state_bag():
+
+    parent = Container()
+    parent.register(ThingDoer)
+
+    first_child = parent.child()
+    second_child = parent.child()
+
+    first_child.register(ContextBag, instance={"msg": "hello"})
+    second_child.register(ContextBag, instance={"msg": "world"})
+
+    with pytest.raises(MissingDependencyError):
+        parent.resolve(ThingDoer)
+
+    assert first_child.resolve(ThingDoer).context["msg"] == "hello"
+    assert second_child.resolve(ThingDoer).context["msg"] == "world"
