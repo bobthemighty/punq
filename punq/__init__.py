@@ -18,7 +18,7 @@ Misc Variables:
 
 import contextlib
 import inspect
-from collections import defaultdict
+from collections import defaultdict, ChainMap
 from enum import Enum
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any, Callable, NamedTuple, get_type_hints
@@ -183,8 +183,8 @@ def _match_defaults(spec):
 
 
 class _Registry:
-    def __init__(self):
-        self.__registrations = defaultdict(list)
+    def __init__(self, parent=None):
+        self.__registrations = ChainMap(parent or defaultdict(list))
         self._localns = {}
 
     def _get_needs_for_ctor(self, cls):
