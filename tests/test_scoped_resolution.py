@@ -73,3 +73,37 @@ def test_when_the_parent_registers_a_dependency():
         parent.resolve(MessageWriter)
 
     child.resolve(MessageWriter)
+
+
+def test_when_overriding_a_singleton_instance():
+    """
+    In this test, we have a FancyDbMessageWriter in the parent and
+    we override a ConnectionStringFactory in the child.
+    Both scopes should resolve, with different connection strings.
+    """
+
+    parent = Container()
+    child = parent.child()
+
+    parent.register(MessageWriter, FancyDbMessageWriter)
+    parent.register(ConnectionStringFactory, instance=lambda: "hello")
+    child.register(ConnectionStringFactory, instance=lambda: "world")
+
+    assert parent.resolve(MessageWriter).connection_string == "hello"
+    assert child.resolve(MessageWriter).connection_string == "world"
+
+
+def test_when_inheriting_a_singleton_instance():
+    """
+    In this test, we have a FancyDbMessageWriter in the parent
+    Both scopes should resolve, with the same connection string.
+    """
+
+    parent = Container()
+    child = parent.child()
+
+    parent.register(MessageWriter, FancyDbMessageWriter)
+    parent.register(ConnectionStringFactory, instance=lambda: "hello")
+
+    assert parent.resolve(MessageWriter).connection_string == "hello"
+    assert child.resolve(MessageWriter).connection_string == "hello"
