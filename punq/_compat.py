@@ -1,6 +1,11 @@
-from typing import ForwardRef
+import sys
+import typing
 
 GenericListClass = list
+if sys.version_info >= (3, 11):
+    ServiceKey = type
+else:
+    ServiceKey = typing.Type
 
 
 def is_generic_list(service):
@@ -12,4 +17,4 @@ def is_generic_list(service):
 
 def ensure_forward_ref(self, service, factory, instance, **kwargs):
     if isinstance(service, str):
-        self.register(ForwardRef(service), factory, instance, **kwargs)
+        self.register(typing.ForwardRef(service), factory, instance, **kwargs)

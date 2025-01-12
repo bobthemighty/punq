@@ -21,15 +21,15 @@ import inspect
 from collections import defaultdict
 from enum import Enum
 from importlib.metadata import PackageNotFoundError, version
-from typing import Any, Callable, NamedTuple, get_type_hints
+from typing import Any, Callable, NamedTuple, get_type_hints, TypeVar, Generic
 
-from ._compat import ensure_forward_ref, is_generic_list
+from ._compat import ensure_forward_ref, is_generic_list, ServiceKey
 
 with contextlib.suppress(PackageNotFoundError):
     __version__ = version(__name__)
 
+TService = TypeVar("TService")
 
-ServiceKey = type
 
 class MissingDependencyException(Exception):
     """Deprecated alias for MissingDependencyError."""
@@ -169,10 +169,10 @@ class Scope(Enum):
     singleton = 1
 
 
-class _Registration(NamedTuple):
-    service: str
+class _Registration(NamedTuple, Generic[TService]):
+    service: ServiceKey[TService]
     scope: Scope
-    builder: Callable[[], Any]
+    builder: Callable[..., TService]
     needs: Any
     args: list[Any]
 
