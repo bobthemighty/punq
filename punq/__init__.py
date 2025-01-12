@@ -331,9 +331,6 @@ class _Registry:
         self._update_localns(service)
         ensure_forward_ref(self, service, factory, instance, **kwargs)
 
-    def __getitem__(self, service):
-        return self.__registrations.get(service)
-
 
 class _ResolutionTarget:
     def __init__(self, key, impls):
