@@ -10,34 +10,20 @@ In order to handle scoping, we need our own datastructure.
 from collections import defaultdict
 from punq import RegistrationScope
 
-class RegistrationScope:
-
-    def __init__(self, parent=None):
-        self.parent = parent
-        self.entries = defaultdict(list)
-
-    def child(self):
-        return RegistrationScope(self)
-
-    def append(self, key, value):
-        self.entries[key].append(value)
-
-    def __get(self, key, result):
-        if self.parent:
-            self.parent.__get(key, result)
-        for elem in self.entries[key]:
-            result.append(elem)
-        return result
-
-    def get(self, key):
-        return self.__get(key, [])
-
 
 def test_a_root_scope_returns_the_empty_list_when_nothing_is_registered():
+    """
+    If we have no registration for a key, then the implementations are an
+    empty list.
+    """
     scope = RegistrationScope()
     assert scope.get("some_key") == []
 
 def test_a_scope_contains_items():
+    """
+    We can add items into a scope and get them back.
+    Wow.
+    """
     scope = RegistrationScope()
     scope.append("some-key", "hello")
     scope.append("some-key", "world")
@@ -45,6 +31,10 @@ def test_a_scope_contains_items():
     assert scope.get("some-key") == ["hello", "world"]
 
 def test_a_child_scope_extends_its_parent():
+    """
+    When a child scope adds an item, it should be added to the list of
+    the child's implementation, but not the parent's.
+    """
     parent = RegistrationScope()
     child = parent.child()
 
@@ -55,6 +45,10 @@ def test_a_child_scope_extends_its_parent():
     assert parent.get("some-key") == ["hello"]
 
 def test_resolution_can_skip_a_level():
+    """
+    If someone goes nuts, the registrations should inherit across multiple
+    levels intuitively.
+    """
 
     grandparent = RegistrationScope()
     parent = RegistrationScope(grandparent)

@@ -129,6 +129,9 @@ class InvalidForwardReferenceError(InvalidForwardReferenceException):
     pass
 
 class RegistrationScope:
+    """
+    Simple chained dictionary[service, list[implementation]].
+    """
 
     def __init__(self, parent=None):
         self.parent = parent
@@ -380,7 +383,6 @@ class Container:
 
     def __init__(self, registrations=None):
         self.registrations = _Registry(registrations)
-        print(self.registrations)
         self.register(Container, instance=self)
         self._singletons = {}
 
@@ -537,10 +539,7 @@ class Container:
 
     def resolve(self, service_key, **kwargs):
         """Build and return an instance of a registered service."""
-        print(self.registrations)
         context = self.registrations.build_context(service_key)
-        for k in context.targets:
-            print(k, context.targets[k].impls)
 
         return self._resolve_impl(service_key, kwargs, context)
 
