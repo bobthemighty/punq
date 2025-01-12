@@ -558,4 +558,51 @@ class Container:
         return self._build_impl(registration, kwargs, context)
 
     def child(self):
+        """Create a new container that inherits configuration from this one.
+
+        You may need to change dependencies for a particular scope of your
+        system, for example, to override them in tests, or to add per-request
+        data.
+
+        Punq supports "child" containers for this purpose.
+
+        Examples:
+            In this example, we want to register a per-request dependency into
+            our child container. Each child will resolve its own instance of
+            the RequestData.
+            The order of registration is unimportant.
+
+            >>> from collections import namedtuple
+
+            >>> RequestData = namedtuple('RequestData', 'user_id is_admin')
+
+            >>> class RequestHandler:
+            ...
+            ...     def __init__(self, state: RequestData):
+            ...         self.state= state
+            ...
+            ...     def handle(self) -> None:
+            ...         print(self.state)
+            ...
+
+            >>> app_container = Container()
+
+            >>> first_request_container = app_container.child()
+            >>> second_request_container = app_container.child()
+
+            >>> first_request_container.register(RequestData, instance=RequestData(123, True))
+            <punq.Container object at 0x...>
+
+            >>> second_request_container.register(RequestData, instance=RequestData(789, False))
+            <punq.Container object at 0x...>
+
+            >>> app_container.register(RequestHandler)
+            <punq.Container object at 0x...>
+
+            >>> first_request_container.resolve(RequestHandler).handle()
+            RequestData(user_id=123, is_admin=True)
+
+            >>> second_request_container.resolve(RequestHandler).handle()
+            RequestData(user_id=789, is_admin=False)
+        """
         return Container(self.registrations)
