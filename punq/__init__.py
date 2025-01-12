@@ -29,6 +29,8 @@ with contextlib.suppress(PackageNotFoundError):
     __version__ = version(__name__)
 
 
+ServiceKey = type
+
 class MissingDependencyException(Exception):
     """Deprecated alias for MissingDependencyError."""
 
