@@ -7,7 +7,7 @@ was unregistered.
 
 In order to handle scoping, we need our own datastructure.
 """
-from collections import defaultdict
+
 from punq import RegistrationScope
 
 
@@ -18,6 +18,7 @@ def test_a_root_scope_returns_the_empty_list_when_nothing_is_registered():
     """
     scope = RegistrationScope()
     assert scope.get("some_key") == []
+
 
 def test_a_scope_contains_items():
     """
@@ -30,6 +31,7 @@ def test_a_scope_contains_items():
 
     assert scope.get("some-key") == ["hello", "world"]
 
+
 def test_a_child_scope_extends_its_parent():
     """
     When a child scope adds an item, it should be added to the list of
@@ -39,10 +41,11 @@ def test_a_child_scope_extends_its_parent():
     child = parent.child()
 
     parent.append("some-key", "hello")
-    child.append("some-key","world")
+    child.append("some-key", "world")
 
     assert child.get("some-key") == ["hello", "world"]
     assert parent.get("some-key") == ["hello"]
+
 
 def test_resolution_can_skip_a_level():
     """
@@ -64,13 +67,13 @@ def test_resolution_can_skip_a_level():
     assert parent.get("a") == [1]
     assert child.get("a") == [1]
 
-    assert grandparent.get("b") == [ 2 ]
-    assert parent.get("b") == [ 2 ]
+    assert grandparent.get("b") == [2]
+    assert parent.get("b") == [2]
     assert child.get("b") == [2, "x"]
 
     assert grandparent.get("c") == []
-    assert parent.get("c") == [ 3 ]
-    assert child.get("c") == [ 3 ]
+    assert parent.get("c") == [3]
+    assert child.get("c") == [3]
 
     assert grandparent.get("d") == []
     assert parent.get("d") == []

@@ -18,7 +18,7 @@ Misc Variables:
 
 import contextlib
 import inspect
-from collections import defaultdict, ChainMap
+from collections import defaultdict
 from enum import Enum
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any, Callable, NamedTuple, get_type_hints
@@ -128,6 +128,7 @@ class InvalidForwardReferenceError(InvalidForwardReferenceException):
 
     pass
 
+
 class RegistrationScope:
     """
     Simple chained dictionary[service, list[implementation]].
@@ -152,8 +153,6 @@ class RegistrationScope:
 
     def get(self, key):
         return self.__get(key, [])
-
-
 
 
 class Scope(Enum):
@@ -248,8 +247,7 @@ class _Registry:
              Sending message via smtp: Hello
         """
         self.__registrations.append(
-            service,
-            _Registration(service, scope, impl, self._get_needs_for_ctor(impl), resolve_args)
+            service, _Registration(service, scope, impl, self._get_needs_for_ctor(impl), resolve_args)
         )
 
     def register_service_and_instance(self, service, instance):
@@ -300,8 +298,7 @@ class _Registry:
         if not inspect.isclass(service):
             raise InvalidSelfRegistrationError(service)
         self.__registrations.append(
-            service,
-            _Registration(service, scope, service, self._get_needs_for_ctor(service), resolve_args or {})
+            service, _Registration(service, scope, service, self._get_needs_for_ctor(service), resolve_args or {})
         )
 
     def build_context(self, key, existing=None):

@@ -1,16 +1,13 @@
-from expects import be_a, equal, expect
 import pytest
+from expects import be_a, expect
 
-from punq import Container, InvalidRegistrationError, MissingDependencyError, Scope
+from punq import Container, MissingDependencyError
 from tests.test_dependencies import (
     ConnectionStringFactory,
     FancyDbMessageWriter,
-    HelloWorldSpeaker,
-    MessageSpeaker,
     MessageWriter,
     StdoutMessageWriter,
     TmpFileMessageWriter,
-    WrappingMessageWriter,
 )
 
 
@@ -20,6 +17,7 @@ def test_scoped_service_with_no_dependencies():
 
     child = container.child()
     expect(child.resolve(MessageWriter)).to(be_a(StdoutMessageWriter))
+
 
 def test_when_overriding_a_service():
     """
@@ -111,13 +109,13 @@ def test_when_inheriting_a_singleton_instance():
 
 ContextBag = dict
 
-class ThingDoer:
 
+class ThingDoer:
     def __init__(self, context: ContextBag):
         self.context = context
 
-def test_when_registering_a_state_bag():
 
+def test_when_registering_a_state_bag():
     parent = Container()
     parent.register(ThingDoer)
 
