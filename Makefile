@@ -8,15 +8,23 @@ install: ## Install the virtual environment and install the pre-commit hooks
 check: ## Run code quality tools.
 	@echo "🚀 Checking lock file consistency with 'pyproject.toml'"
 	@uv lock --locked
+	@echo "🚀 Running type check"
+	@uv run pyright
 	@echo "🚀 Linting code: Running pre-commit"
 	@uv run pre-commit run -a
 	@echo "🚀 Checking for obsolete dependencies: Running deptry"
 	@uv run deptry .
 
+.PHONY: fmt
+fmt:
+	@echo "Format and fix"
+	@uv run ruff check --fix
+	@uv run ruff format
+
 .PHONY: test
 test: ## Test the code with pytest
 	@echo "🚀 Testing code: Running pytest"
-	@uv run python -m pytest --cov --cov-config=pyproject.toml --cov-report=xml
+	@uv run python -m pytest --cov --cov-config=pyproject.toml --cov-report=xml --doctest-modules punq
 
 .PHONY: build
 build: clean-build ## Build wheel file

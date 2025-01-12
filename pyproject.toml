@@ -39,6 +39,7 @@ dev-dependencies = [
     "attrs>=24.2.0",
     "mkdocs-include-markdown-plugin>=6.2.2",
     "xdoctest>=1.2.0",
+    "pyright>=1.1.391",
 ]
 
 [build-system]

@@ -1,3 +1,4 @@
+import typing as t
 from tempfile import NamedTemporaryFile
 
 import pytest
@@ -27,8 +28,11 @@ def test_dependencies_are_injected():
     container.register(MessageSpeaker, HelloWorldSpeaker)
 
     speaker = container.resolve(MessageSpeaker)
+    t.assert_type(speaker, MessageSpeaker)
 
     expect(speaker).to(be_a(HelloWorldSpeaker))
+
+    speaker = t.cast(HelloWorldSpeaker, speaker)
     expect(speaker.writer).to(be_a(StdoutMessageWriter))
 
 
@@ -53,6 +57,9 @@ def test_can_register_with_a_custom_factory():
     container.register(MessageSpeaker, HelloWorldSpeaker)
 
     speaker = container.resolve(MessageSpeaker)
+
+    t.assert_type(speaker, MessageSpeaker)
+    speaker = t.cast(HelloWorldSpeaker, speaker)
 
     expect(speaker).to(be_a(HelloWorldSpeaker))
     expect(speaker.writer).to(equal("win"))
@@ -104,7 +111,7 @@ def test_registering_an_instance_as_concrete_is_exception():
     writer = MessageWriter()
 
     with pytest.raises(InvalidRegistrationError):
-        container.register(writer)
+        container.register(writer) # type: ignore
 
 
 def test_registering_an_instance_as_factory_is_exception():
@@ -116,7 +123,7 @@ def test_registering_an_instance_as_factory_is_exception():
     writer = MessageWriter()
 
     with pytest.raises(InvalidRegistrationError):
-        container.register(MessageWriter, writer)
+        container.register(MessageWriter, writer) # type: ignore
 
 
 def test_registering_a_callable_as_concrete_is_exception():
@@ -129,7 +136,7 @@ def test_registering_a_callable_as_concrete_is_exception():
     container = Container()
 
     with pytest.raises(InvalidRegistrationError):
-        container.register(lambda: "oops")
+        container.register(lambda: "oops") # type: ignore
 
 
 def test_can_provide_arguments_to_registrations():
@@ -137,8 +144,11 @@ def test_can_provide_arguments_to_registrations():
     container.register(MessageWriter, FancyDbMessageWriter, cstr=lambda: "Hello world")
 
     writer = container.resolve(MessageWriter)
+    t.assert_type(writer, MessageWriter)
 
     expect(writer).to(be_a(FancyDbMessageWriter))
+
+    writer = t.cast(FancyDbMessageWriter, writer)
     expect(writer.connection_string).to(equal("Hello world"))
 
 
@@ -147,6 +157,7 @@ def test_can_provide_arguments_to_resolve():
     container.register(MessageWriter, TmpFileMessageWriter)
 
     instance = container.resolve(MessageWriter, path="foo")
+    instance = t.cast(TmpFileMessageWriter, instance)
     expect(instance.path).to(equal("foo"))
 
 
@@ -156,6 +167,8 @@ def test_can_provide_arguments_to_resolve_having_dependencies():
     container.register(MessageWriter, WrappingMessageWriter)
 
     instance = container.resolve(MessageWriter, context="bar")
+
+    instance = t.cast(WrappingMessageWriter, instance)
     expect(instance.context).to(equal("bar"))
 
 
@@ -165,15 +178,15 @@ def test_can_provide_typed_arguments_to_resolve():
     container.register(TmpFileMessageWriter)
     container.register(HelloWorldSpeaker)
 
-    tmpfile = NamedTemporaryFile()
+    with NamedTemporaryFile() as tmpfile:
 
-    writer = container.resolve(MessageWriter, path=tmpfile.name)
-    speaker = container.resolve(HelloWorldSpeaker, writer=writer)
+        writer = container.resolve(MessageWriter, path=tmpfile.name)
+        speaker = container.resolve(HelloWorldSpeaker, writer=writer)
 
-    speaker.speak()
+        speaker.speak()
 
-    tmpfile.seek(0)
-    expect(tmpfile.read().decode()).to(equal("Hello World"))
+        tmpfile.seek(0)
+        expect(tmpfile.read().decode()).to(equal("Hello World"))
 
 
 def test_resolve_returns_the_latest_registration_for_a_service():
