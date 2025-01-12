@@ -21,14 +21,14 @@ import inspect
 from collections import defaultdict
 from enum import Enum
 from importlib.metadata import PackageNotFoundError, version
-from typing import Any, Callable, NamedTuple, get_type_hints, TypeVar, Generic
+from typing import TYPE_CHECKING, Any, Callable, Generic, NamedTuple, Self, TypeVar, get_type_hints, overload
 
-from ._compat import ensure_forward_ref, is_generic_list, ServiceKey
+from ._compat import ServiceKey, ensure_forward_ref, is_generic_list
 
 with contextlib.suppress(PackageNotFoundError):
     __version__ = version(__name__)
 
-TService = TypeVar("TService")
+TService = TypeVar("TService", covariant=True)
 
 
 class MissingDependencyException(Exception):
@@ -174,7 +174,15 @@ class _Registration(NamedTuple, Generic[TService]):
     scope: Scope
     builder: Callable[..., TService]
     needs: Any
-    args: list[Any]
+    args: dict
+
+
+class _UntypedRegistration(NamedTuple):
+    service: str
+    scope: Scope
+    builder: Callable[..., Any]
+    needs: Any
+    args: dict
 
 
 class _Empty:
@@ -385,6 +393,26 @@ class Container:
         self.register(Container, instance=self)
         self._singletons = {}
 
+    @overload
+    def register(self, service: str, factory: Callable[..., Any]) -> Self:
+        ...
+
+    @overload
+    def register(self, service: str, *, instance: Any) -> Self:
+        ...
+
+    @overload
+    def register(self, service: ServiceKey[TService], factory: Callable[..., TService], *, scope=Scope.transient, **kwargs) -> Self:
+        ...
+
+    @overload
+    def register(self, service: ServiceKey[TService], *, instance: TService, scope=Scope.transient, **kwargs) -> Self:
+        ...
+
+    @overload
+    def register(self, service: ServiceKey[TService], *, scope=Scope.transient, **kwargs) -> Self:
+        ...
+
     def register(self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs):
         """Register a dependency into the container.
 
@@ -523,6 +551,8 @@ class Container:
 
         target = context.target(service_key)
 
+        if TYPE_CHECKING:
+            assert target is not None
         if target.is_generic_list():
             return self.resolve_all(target.generic_parameter)
 
@@ -535,6 +565,14 @@ class Container:
             raise MissingDependencyError("Failed to resolve implementation for " + str(service_key))
 
         return self._build_impl(registration, kwargs, context)
+
+    @overload
+    def resolve(self, service_key: str, **kwargs) -> Any:
+        ...
+
+    @overload
+    def resolve(self, service_key: ServiceKey[TService], **kwargs) -> TService:
+        ...
 
     def resolve(self, service_key, **kwargs):
         """Build and return an instance of a registered service."""
