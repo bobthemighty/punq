@@ -276,7 +276,7 @@ class _Registry:
             ... )
             <punq.Container object at 0x...>
         """
-        self.__registrations.append(service, _Registration(service, Scope.singleton, lambda: instance, {}, {}))
+        self.__registrations.append(service, _Registration(service, Scope.singleton, lambda: instance, {}, []))
 
     def register_concrete_service(self, service, scope, resolve_args=None):
         """Register a service as its own implementation.
