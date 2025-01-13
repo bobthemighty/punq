@@ -1,3 +1,5 @@
+import typing
+
 import pytest
 from expects import be_a, expect
 
@@ -87,8 +89,8 @@ def test_when_overriding_a_singleton_instance():
     parent.register(ConnectionStringFactory, instance=lambda: "hello")
     child.register(ConnectionStringFactory, instance=lambda: "world")
 
-    assert parent.resolve(MessageWriter).connection_string == "hello"
-    assert child.resolve(MessageWriter).connection_string == "world"
+    assert typing.cast(FancyDbMessageWriter, parent.resolve(MessageWriter)).connection_string == "hello"
+    assert typing.cast(FancyDbMessageWriter, child.resolve(MessageWriter)).connection_string == "world"
 
 
 def test_when_inheriting_a_singleton_instance():
@@ -103,8 +105,8 @@ def test_when_inheriting_a_singleton_instance():
     parent.register(MessageWriter, FancyDbMessageWriter)
     parent.register(ConnectionStringFactory, instance=lambda: "hello")
 
-    assert parent.resolve(MessageWriter).connection_string == "hello"
-    assert child.resolve(MessageWriter).connection_string == "hello"
+    assert typing.cast(FancyDbMessageWriter, parent.resolve(MessageWriter)).connection_string == "hello"
+    assert typing.cast(FancyDbMessageWriter, child.resolve(MessageWriter)).connection_string == "hello"
 
 
 ContextBag = dict

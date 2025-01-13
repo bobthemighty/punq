@@ -1,4 +1,5 @@
-from expects import expect, have_len
+import typing
+from expects import be_a, expect, have_len
 
 from punq import Container
 from tests.test_dependencies import MessageSpeaker, MessageWriter, StdoutMessageWriter, TmpFileMessageWriter
@@ -24,4 +25,6 @@ def test_can_resolve_a_list_of_dependencies():
 
     instance = container.resolve(MessageSpeaker)
 
+    expect(instance).to(be_a(BroadcastSpeaker))
+    instance = typing.cast(BroadcastSpeaker, instance)
     expect(instance.writers).to(have_len(2))
