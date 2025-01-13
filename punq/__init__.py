@@ -529,6 +529,10 @@ class Container:
         if registration is None and default is not None:
             return default
 
+        if registration is None and inspect.isclass(service_key):
+            self.registrations.register_concrete_service(service_key, Scope.transient)
+            return self._resolve_impl(service_key, kwargs, None, default)
+
         if registration is None:
             raise MissingDependencyError("Failed to resolve implementation for " + str(service_key))
 
