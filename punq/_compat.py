@@ -1,11 +1,12 @@
 import sys
 import typing
+import typing_extensions
 
 GenericListClass = list
 if sys.version_info >= (3, 11):
-    ServiceKey = type
+    ServiceKey = typing_extensions.TypeForm
 else:
-    ServiceKey = typing.Type
+    ServiceKey = typing_extensions.TypeForm
 
 
 def is_generic_list(service):

@@ -1,6 +1,8 @@
-from typing import Protocol
+from typing import Protocol, Callable, reveal_type
+from typing_extensions import TypeForm
 
 import punq
+from punq._compat import ServiceKey
 
 
 class Parser(Protocol):
@@ -42,6 +44,10 @@ class IdentityParser:
 def test_can_resolve_with_kwonlyargs():
     container = punq.Container()
     result = []
+    f: Callable[..., Parser] = ReverseParser
+    k: TypeForm[Parser] = Parser
+
+
     container.register(Parser, ReverseParser)
     container.register(Writer, instance=ListWriter(result))
     container.register(Doer)

@@ -1,14 +1,32 @@
-import typing as t
+from typing import Callable, Generic, Type, TypeVar, Protocol, Union
 
-import punq as pq
+# A flexible TypeVar for TService
+TService = TypeVar("TService", bound=object)  # Must be an object type
+TProtocol = TypeVar("TProtocol", bound=Protocol)
 
-from . import test_dependencies as d
+class _Registration(Generic[TService]):
+    def __init__(
+        self,
+        service: Union[Type[TService], Protocol],  # Supports a class or a protocol
+        builder: Callable[..., TService],  # Builder must return TService or compatible type
+    ):
+        self.service = service
+        self.builder = builder
 
-container = pq.Container()
+        # Runtime validation for classes (if service is a class)
+        if isinstance(service, type):
+            instance = builder()
+            if not isinstance(instance, service):
+                raise TypeError(f"Builder does not produce an instance of {service}")
 
-registration = pq._Registration(type[d.MessageWriter], pq.Scope.transient, d.TmpFileMessageWriter, pq.empty, [])
+
+class Parent(Protocol):
+    def do_something(self) -> None:
+        pass
+
+class Child:
+    def do_something(self) -> None:
+        print("Child doing something")
 
 
-registration = pq._UntypedRegistration("My type", pq.Scope.transient, d.TmpFileMessageWriter, pq.empty, [])
-
-t.assert_type(registration.builder, t.Callable[..., t.Any])
+f: Callable[..., Parent] = Child

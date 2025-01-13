@@ -754,6 +754,7 @@ dev = [
     { name = "ruff" },
     { name = "sqlalchemy" },
     { name = "tox-uv" },
+    { name = "typing-extensions" },
     { name = "xdoctest" },
 ]
 
@@ -775,6 +776,7 @@ dev = [
     { name = "ruff", specifier = ">=0.6.9" },
     { name = "sqlalchemy", specifier = ">=2.0.36" },
     { name = "tox-uv", specifier = ">=1.11.3" },
+    { name = "typing-extensions", specifier = ">=4.12.2" },
     { name = "xdoctest", specifier = ">=1.2.0" },
 ]
 

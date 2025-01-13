@@ -21,7 +21,7 @@ import inspect
 from collections import defaultdict
 from enum import Enum
 from importlib.metadata import PackageNotFoundError, version
-from typing import TYPE_CHECKING, Any, Callable, Generic, NamedTuple, Self, TypeVar, get_type_hints, overload
+from typing import TYPE_CHECKING, Any, Callable, Generic, NamedTuple, Self, TypeVar, get_type_hints, overload, Protocol
 
 from ._compat import ServiceKey, ensure_forward_ref, is_generic_list
 
@@ -29,7 +29,6 @@ with contextlib.suppress(PackageNotFoundError):
     __version__ = version(__name__)
 
 TService = TypeVar("TService", covariant=True)
-
 
 class MissingDependencyException(Exception):
     """Deprecated alias for MissingDependencyError."""

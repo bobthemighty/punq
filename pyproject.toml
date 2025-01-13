@@ -40,6 +40,7 @@ dev-dependencies = [
     "mkdocs-include-markdown-plugin>=6.2.2",
     "xdoctest>=1.2.0",
     "pyright>=1.1.391",
+    "typing-extensions>=4.12.2",
 ]
 
 [build-system]
@@ -55,6 +56,9 @@ check_untyped_defs = true
 warn_return_any = true
 warn_unused_ignores = true
 show_error_codes = true
+
+[tool.pyright]
+enableExperimentalFeatures = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
