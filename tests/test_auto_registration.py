@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from expects import expect, be_a
+from expects import be_a, expect
 
 from punq import Container
+
 
 class Dependency:
     pass
