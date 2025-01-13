@@ -378,7 +378,7 @@ class Container:
     will only need to interact with this class.
     """
 
-    def __init__(self, registrations=None):
+    def __init__(self, registrations=None, auto_register=False):
         self.registrations = _Registry(registrations)
         self.register(Container, instance=self)
         self._singletons = {}
