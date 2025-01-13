@@ -165,15 +165,14 @@ def test_can_provide_typed_arguments_to_resolve():
     container.register(TmpFileMessageWriter)
     container.register(HelloWorldSpeaker)
 
-    tmpfile = NamedTemporaryFile()
+    with NamedTemporaryFile() as tmpfile:
+        writer = container.resolve(MessageWriter, path=tmpfile.name)
+        speaker = container.resolve(HelloWorldSpeaker, writer=writer)
 
-    writer = container.resolve(MessageWriter, path=tmpfile.name)
-    speaker = container.resolve(HelloWorldSpeaker, writer=writer)
+        speaker.speak()
 
-    speaker.speak()
-
-    tmpfile.seek(0)
-    expect(tmpfile.read().decode()).to(equal("Hello World"))
+        tmpfile.seek(0)
+        expect(tmpfile.read().decode()).to(equal("Hello World"))
 
 
 def test_resolve_returns_the_latest_registration_for_a_service():

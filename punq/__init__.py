@@ -129,6 +129,32 @@ class InvalidForwardReferenceError(InvalidForwardReferenceException):
     pass
 
 
+class RegistrationScope:
+    """
+    Simple chained dictionary[service, list[implementation]].
+    """
+
+    def __init__(self, parent=None):
+        self.parent = parent
+        self.entries = defaultdict(list)
+
+    def child(self):
+        return RegistrationScope(self)
+
+    def append(self, key, value):
+        self.entries[key].append(value)
+
+    def __get(self, key, result):
+        if self.parent:
+            self.parent.__get(key, result)
+        for elem in self.entries[key]:
+            result.append(elem)
+        return result
+
+    def get(self, key):
+        return self.__get(key, [])
+
+
 class Scope(Enum):
     """Controls the lifetime of resolved objects.
 
@@ -183,8 +209,11 @@ def _match_defaults(spec):
 
 
 class _Registry:
-    def __init__(self):
-        self.__registrations = defaultdict(list)
+    def __init__(self, parent=None):
+        if not parent:
+            self.__registrations = RegistrationScope()
+        else:
+            self.__registrations = parent.__registrations.child()
         self._localns = {}
 
     def _get_needs_for_ctor(self, cls):
@@ -217,8 +246,8 @@ class _Registry:
              >>> instance.send("Hello")
              Sending message via smtp: Hello
         """
-        self.__registrations[service].append(
-            _Registration(service, scope, impl, self._get_needs_for_ctor(impl), resolve_args)
+        self.__registrations.append(
+            service, _Registration(service, scope, impl, self._get_needs_for_ctor(impl), resolve_args)
         )
 
     def register_service_and_instance(self, service, instance):
@@ -247,7 +276,7 @@ class _Registry:
             ... )
             <punq.Container object at 0x...>
         """
-        self.__registrations[service].append(_Registration(service, Scope.singleton, lambda: instance, {}, {}))
+        self.__registrations.append(service, _Registration(service, Scope.singleton, lambda: instance, {}, {}))
 
     def register_concrete_service(self, service, scope, resolve_args=None):
         """Register a service as its own implementation.
@@ -268,16 +297,16 @@ class _Registry:
         """
         if not inspect.isclass(service):
             raise InvalidSelfRegistrationError(service)
-        self.__registrations[service].append(
-            _Registration(service, scope, service, self._get_needs_for_ctor(service), resolve_args or {})
+        self.__registrations.append(
+            service, _Registration(service, scope, service, self._get_needs_for_ctor(service), resolve_args or {})
         )
 
     def build_context(self, key, existing=None):
         if existing is None:
-            return _ResolutionContext(key, list(self.__getitem__(key)))
+            return _ResolutionContext(key, self.__registrations.get(key))
 
         if key not in existing.targets:
-            existing.targets[key] = _ResolutionTarget(key, list(self.__getitem__(key)))
+            existing.targets[key] = _ResolutionTarget(key, self.__registrations.get(key))
 
         return existing
 
@@ -301,9 +330,6 @@ class _Registry:
 
         self._update_localns(service)
         ensure_forward_ref(self, service, factory, instance, **kwargs)
-
-    def __getitem__(self, service):
-        return self.__registrations[service]
 
 
 class _ResolutionTarget:
@@ -352,8 +378,8 @@ class Container:
     will only need to interact with this class.
     """
 
-    def __init__(self):
-        self.registrations = _Registry()
+    def __init__(self, registrations=None):
+        self.registrations = _Registry(registrations)
         self.register(Container, instance=self)
         self._singletons = {}
 
@@ -527,3 +553,53 @@ class Container:
         context = _ResolutionContext(service_key, [registration])
 
         return self._build_impl(registration, kwargs, context)
+
+    def child(self):
+        """Create a new container that inherits configuration from this one.
+
+        You may need to change dependencies for a particular scope of your
+        system, for example, to override them in tests, or to add per-request
+        data.
+
+        Punq supports "child" containers for this purpose.
+
+        Examples:
+            In this example, we want to register a per-request dependency into
+            our child container. Each child will resolve its own instance of
+            the RequestData.
+            The order of registration is unimportant.
+
+            >>> from collections import namedtuple
+
+            >>> RequestData = namedtuple('RequestData', 'user_id is_admin')
+
+            >>> class RequestHandler:
+            ...
+            ...     def __init__(self, state: RequestData):
+            ...         self.state= state
+            ...
+            ...     def handle(self) -> None:
+            ...         print(self.state)
+            ...
+
+            >>> app_container = Container()
+
+            >>> first_request_container = app_container.child()
+            >>> second_request_container = app_container.child()
+
+            >>> first_request_container.register(RequestData, instance=RequestData(123, True))
+            <punq.Container object at 0x...>
+
+            >>> second_request_container.register(RequestData, instance=RequestData(789, False))
+            <punq.Container object at 0x...>
+
+            >>> app_container.register(RequestHandler)
+            <punq.Container object at 0x...>
+
+            >>> first_request_container.resolve(RequestHandler).handle()
+            RequestData(user_id=123, is_admin=True)
+
+            >>> second_request_container.resolve(RequestHandler).handle()
+            RequestData(user_id=789, is_admin=False)
+        """
+        return Container(self.registrations)

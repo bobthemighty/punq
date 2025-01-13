@@ -13,10 +13,16 @@ check: ## Run code quality tools.
 	@echo "🚀 Checking for obsolete dependencies: Running deptry"
 	@uv run deptry .
 
+.PHONY: fmt
+fmt:
+	@echo "Format and fix"
+	@uv run ruff check --fix
+	@uv run ruff format
+
 .PHONY: test
 test: ## Test the code with pytest
 	@echo "🚀 Testing code: Running pytest"
-	@uv run python -m pytest --cov --cov-config=pyproject.toml --cov-report=xml
+	@uv run python -m pytest --cov --cov-config=pyproject.toml --cov-report=xml --doctest-modules punq
 
 .PHONY: build
 build: clean-build ## Build wheel file
