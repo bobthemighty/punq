@@ -378,10 +378,11 @@ class Container:
     will only need to interact with this class.
     """
 
-    def __init__(self, registrations=None):
+    def __init__(self, registrations=None, auto_register=False):
         self.registrations = _Registry(registrations)
         self.register(Container, instance=self)
         self._singletons = {}
+        self._auto_register = auto_register
 
     def register(self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs):
         """Register a dependency into the container.
@@ -510,6 +511,11 @@ class Container:
 
         return result
 
+    def _should_auto_register(self, service_key, registration):
+        if self._auto_register is False:
+            return False
+        return registration is None and inspect.isclass(service_key)
+
     def _resolve_impl(self, service_key, kwargs, context, default=None):
         context = self.registrations.build_context(service_key, context)
 
@@ -528,6 +534,10 @@ class Container:
 
         if registration is None and default is not None:
             return default
+
+        if self._should_auto_register(service_key, registration):
+            self.registrations.register_concrete_service(service_key, Scope.transient)
+            return self._resolve_impl(service_key, kwargs, None, default)
 
         if registration is None:
             raise MissingDependencyError("Failed to resolve implementation for " + str(service_key))
@@ -602,4 +612,4 @@ class Container:
             >>> second_request_container.resolve(RequestHandler).handle()
             RequestData(user_id=789, is_admin=False)
         """
-        return Container(self.registrations)
+        return Container(self.registrations, auto_register=self._auto_register)
