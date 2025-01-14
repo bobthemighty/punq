@@ -612,4 +612,4 @@ class Container:
             >>> second_request_container.resolve(RequestHandler).handle()
             RequestData(user_id=789, is_admin=False)
         """
-        return Container(self.registrations)
+        return Container(self.registrations, auto_register=self._auto_register)
