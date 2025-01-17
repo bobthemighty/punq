@@ -21,9 +21,11 @@ import inspect
 from collections import defaultdict
 from enum import Enum
 from importlib.metadata import PackageNotFoundError, version
-from typing import Any, Callable, NamedTuple, get_type_hints
+from typing import Any, Callable, NamedTuple, get_type_hints, TypeVar, Type
 
 from ._compat import ensure_forward_ref, is_generic_list
+
+T = TypeVar('T')
 
 with contextlib.suppress(PackageNotFoundError):
     __version__ = version(__name__)
@@ -544,7 +546,7 @@ class Container:
 
         return self._build_impl(registration, kwargs, context)
 
-    def resolve(self, service_key, **kwargs):
+    def resolve(self, service_key: Type[T], **kwargs) -> T:
         """Build and return an instance of a registered service."""
         context = self.registrations.build_context(service_key)
 
