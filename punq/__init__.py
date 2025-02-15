@@ -197,12 +197,13 @@ def _match_defaults(spec):
         # Defaults for args are just a tuple. We match args with their defaults
         # by position, starting at the first defaulted arg
         offset = len(spec.args) - len(spec.defaults)
-        defaults = ([None] * offset) + list(spec.defaults)
+        defaults = ([empty] * offset) + list(spec.defaults)
 
-        ns = {key: value for key, value in zip(spec.args, defaults) if value is not None}
+        # filter only args with default value presented
+        ns = {key: value for key, value in zip(spec.args, defaults) if value is not empty}
 
     if spec.kwonlydefaults is not None:
-        # defaults for kwargs are in a dict, so we just update the result dict.
+        # defaults for kwargs are in a dict, so we just update the result dict
         ns.update(spec.kwonlydefaults)
 
     return ns
@@ -491,7 +492,7 @@ class Container:
 
         args = _match_defaults(spec)
         args.update({
-            k: self._resolve_impl(v, resolution_args, context, args.get(k))
+            k: self._resolve_impl(v, resolution_args, context, args.get(k, empty))
             for k, v in registration.needs.items()
             if k != "return" and k not in registration.args and k not in resolution_args
         })
@@ -516,7 +517,7 @@ class Container:
             return False
         return registration is None and inspect.isclass(service_key)
 
-    def _resolve_impl(self, service_key, kwargs, context, default=None):
+    def _resolve_impl(self, service_key, kwargs, context, default=empty):
         context = self.registrations.build_context(service_key, context)
 
         if service_key in self._singletons:
@@ -532,7 +533,7 @@ class Container:
 
         registration = target.next_impl()
 
-        if registration is None and default is not None:
+        if registration is None and default is not empty:
             return default
 
         if self._should_auto_register(service_key, registration):
