@@ -173,6 +173,7 @@ class _Registration(NamedTuple):
     builder: Callable[[], Any]
     needs: Any
     args: list[Any]
+    cache: bool
 
 
 class _Empty:
@@ -222,7 +223,7 @@ class _Registry:
         except NameError as e:
             raise InvalidForwardReferenceError(str(e)) from e
 
-    def register_service_and_impl(self, service, scope, impl, resolve_args):
+    def register_service_and_impl(self, service, scope, impl, resolve_args, cache=True):
         """Registers a concrete implementation of an abstract service.
 
         Examples:
@@ -247,7 +248,15 @@ class _Registry:
              Sending message via smtp: Hello
         """
         self.__registrations.append(
-            service, _Registration(service, scope, impl, self._get_needs_for_ctor(impl), resolve_args)
+            service,
+            _Registration(
+                service,
+                scope,
+                impl,
+                self._get_needs_for_ctor(impl),
+                resolve_args,
+                cache,
+            ),
         )
 
     def register_service_and_instance(self, service, instance):
@@ -276,9 +285,12 @@ class _Registry:
             ... )
             <punq.Container object at 0x...>
         """
-        self.__registrations.append(service, _Registration(service, Scope.singleton, lambda: instance, {}, {}))
+        self.__registrations.append(
+            service,
+            _Registration(service, Scope.singleton, lambda: instance, {}, {}, True),
+        )
 
-    def register_concrete_service(self, service, scope, resolve_args=None):
+    def register_concrete_service(self, service, scope, resolve_args=None, cache=True):
         """Register a service as its own implementation.
 
         Examples:
@@ -298,7 +310,15 @@ class _Registry:
         if not inspect.isclass(service):
             raise InvalidSelfRegistrationError(service)
         self.__registrations.append(
-            service, _Registration(service, scope, service, self._get_needs_for_ctor(service), resolve_args or {})
+            service,
+            _Registration(
+                service,
+                scope,
+                service,
+                self._get_needs_for_ctor(service),
+                resolve_args or {},
+                cache,
+            ),
         )
 
     def build_context(self, key, existing=None):
@@ -316,15 +336,23 @@ class _Registry:
         else:
             self._localns[service] = service
 
-    def register(self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs):
+    def register(
+        self,
+        service,
+        factory=empty,
+        instance=empty,
+        scope=Scope.transient,
+        cache=True,
+        **kwargs,
+    ):
         resolve_args = kwargs or {}
 
         if instance is not empty:
             self.register_service_and_instance(service, instance)
         elif factory is empty:
-            self.register_concrete_service(service, scope, resolve_args)
+            self.register_concrete_service(service, scope, resolve_args, cache)
         elif callable(factory):
-            self.register_service_and_impl(service, scope, factory, resolve_args)
+            self.register_service_and_impl(service, scope, factory, resolve_args, cache)
         else:
             raise InvalidFactoryError(service, factory)
 
@@ -336,6 +364,7 @@ class _ResolutionTarget:
     def __init__(self, key, impls):
         self.service = key
         self.impls = impls
+        self.cache = True
 
     def is_generic_list(self):
         return is_generic_list(self.service)
@@ -346,7 +375,10 @@ class _ResolutionTarget:
 
     def next_impl(self):
         if len(self.impls) > 0:
-            return self.impls.pop()
+            impl = self.impls.pop()
+            if not impl.cache:
+                self.impls.append(impl)
+            return impl
 
 
 class _ResolutionContext:
@@ -384,7 +416,15 @@ class Container:
         self._singletons = {}
         self._auto_register = auto_register
 
-    def register(self, service, factory=empty, instance=empty, scope=Scope.transient, **kwargs):
+    def register(
+        self,
+        service,
+        factory=empty,
+        instance=empty,
+        scope=Scope.transient,
+        cache=True,
+        **kwargs,
+    ):
         """Register a dependency into the container.
 
         Each registration in Punq has a "service", which is the key used for
@@ -445,7 +485,7 @@ class Container:
             >>> instance.send("beep")
             Sending message via smtp
         """
-        self.registrations.register(service, factory, instance, scope, **kwargs)
+        self.registrations.register(service, factory, instance, scope, cache, **kwargs)
         return self
 
     def resolve_all(self, service, **kwargs):
@@ -507,7 +547,8 @@ class Container:
         if registration.scope == Scope.singleton:
             self._singletons[registration.service] = result
 
-        context[registration.service] = result
+        if registration.cache:
+            context[registration.service] = result
 
         return result
 
@@ -536,7 +577,7 @@ class Container:
             return default
 
         if self._should_auto_register(service_key, registration):
-            self.registrations.register_concrete_service(service_key, Scope.transient)
+            self.registrations.register_concrete_service(service_key, Scope.transient, cache=False)
             return self._resolve_impl(service_key, kwargs, None, default)
 
         if registration is None:
@@ -558,6 +599,7 @@ class Container:
             service_key,
             self.registrations._get_needs_for_ctor(service_key),
             {},
+            True,
         )
 
         context = _ResolutionContext(service_key, [registration])
