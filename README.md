@@ -1,3 +1,36 @@
+# Punq is Archived
+
+When I originally wrote this library, I was in the middle of writing Cosmic
+Python. I wanted to show how a dependency container could simplify wiring up a
+complex application, but I was disappointed by the available options which
+tended to adopt a config-heavy style a la PHP rather than a simpler,
+type-oriented style. 
+
+I went through the code of Funq, fired up pytest, and set about TDDing myself a
+DI library.
+
+I have never used this library in production. Mostly, that's because when I left
+MADE.com, I began using serverless architectures, where a Lambda handler is a
+natural composition root, that only needs to build a small number of
+dependencies. The itch I had when I started this library has been well and truly
+scratched: I have shown an example of how to build a simple DI container, using
+type hints for registration; the code is relatively straightforward; there is
+100% code coverage. Another engineer, better motivated, can take this code -
+which is free of license encumberance - and build whatever complex thing they
+need. I wish them all the best.
+
+I would have liked to implement full type-safety, but Python as of 3.11 makes
+that a little difficult. Perhaps, when the type checking tools catch up, I'll
+have a go for fun.
+I do not want to make this library more fully-featured, because then it loses
+its value as a learning tool. I am gratified that people have used and found
+benefit from my small experiment, and will bless whatever forks might take over.
+
+I have completely failed to maintain this code, because it is not useful to me,
+and because I want it to be a simple example for others who might build more
+useful tools in future. I am relucantly archiving it. So long, and thanks for
+all the stars.
+
 # Punq
 
 [![Release](https://img.shields.io/github/v/release/bobthemighty/punq)](https://img.shields.io/github/v/release/bobthemighty/punq)
