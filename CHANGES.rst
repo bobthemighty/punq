@@ -1,5 +1,15 @@
 Changelog
 =========
+
+
+WIP
+---
+  Dropped Python3.8 support.
+  Dropped Python3.9 support.
+  Added Python3.14 support.
+  Added type annotations and ``py.typed`` file.
+  Now ``Container.child`` returns ``Self`` type, not ``Container`` type.
+
 `0.7.0`_ 2023-09-11
 -------------------
     Dropped Python3.7 support.

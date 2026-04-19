@@ -24,7 +24,7 @@ Punq is available on the [cheese shop][2]
 pip install punq
 ```
 
-Documentation is available on [Github pages][3].
+Documentation is available on [GitHub pages][3].
 
 ## Quick Start
 

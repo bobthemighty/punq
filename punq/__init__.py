@@ -16,23 +16,27 @@ Misc Variables:
     empty
 """
 
+from __future__ import annotations
+
 import contextlib
 import inspect
 from collections import defaultdict
-from enum import Enum
+from collections.abc import Callable
+from enum import Enum, unique
 from importlib.metadata import PackageNotFoundError, version
-from typing import Any, Callable, NamedTuple, get_type_hints
+from typing import Any, ForwardRef, Generic, NamedTuple, TypeVar, get_origin, overload
 
-from ._compat import ensure_forward_ref, is_generic_list
+from typing_extensions import Self, get_type_hints
 
 with contextlib.suppress(PackageNotFoundError):
     __version__ = version(__name__)
 
 
+_T = TypeVar("_T")
+
+
 class MissingDependencyException(Exception):
     """Deprecated alias for MissingDependencyError."""
-
-    pass
 
 
 class MissingDependencyError(MissingDependencyException):
@@ -46,35 +50,27 @@ class MissingDependencyError(MissingDependencyException):
         punq.MissingDependencyError: Failed to resolve implementation for foo
     """
 
-    pass
-
 
 class InvalidRegistrationException(Exception):
     """Deprecated alias for InvalidRegistrationError."""
-
-    pass
 
 
 class InvalidRegistrationError(InvalidRegistrationException):
     """Raised when a registration would result in an unresolvable service."""
 
-    pass
-
 
 class InvalidFactoryError(InvalidRegistrationError):
-    def __init__(self, service, factory):
+    def __init__(self, service: Any, factory: Any) -> None:
         super().__init__(f"Expected a callable factory for the service {service} but received {factory}")
 
 
 class InvalidSelfRegistrationError(InvalidRegistrationError):
-    def __init__(self, service):
+    def __init__(self, service: Any) -> None:
         super().__init__(f"The service {service!r} can't be registered as its own implementation")
 
 
 class InvalidForwardReferenceException(Exception):
     """Deprecated alias for InvalidForwardReferenceError."""
-
-    pass
 
 
 class InvalidForwardReferenceError(InvalidForwardReferenceException):
@@ -126,35 +122,34 @@ class InvalidForwardReferenceError(InvalidForwardReferenceException):
 
     """
 
-    pass
-
 
 class RegistrationScope:
     """
     Simple chained dictionary[service, list[implementation]].
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: RegistrationScope | None = None) -> None:
         self.parent = parent
-        self.entries = defaultdict(list)
+        self.entries: defaultdict[Any, list[Any]] = defaultdict(list)
 
-    def child(self):
-        return RegistrationScope(self)
+    def child(self) -> Self:
+        return type(self)(self)
 
-    def append(self, key, value):
+    def append(self, key: Any, value: Any) -> None:
         self.entries[key].append(value)
 
-    def __get(self, key, result):
+    def __get(self, key: Any, result: list[Any]) -> list[Any]:
         if self.parent:
             self.parent.__get(key, result)
         for elem in self.entries[key]:
             result.append(elem)
         return result
 
-    def get(self, key):
+    def get(self, key: Any) -> list[Any]:
         return self.__get(key, [])
 
 
+@unique
 class Scope(Enum):
     """Controls the lifetime of resolved objects.
 
@@ -167,12 +162,12 @@ class Scope(Enum):
     singleton = 1
 
 
-class _Registration(NamedTuple):
-    service: str
+class _Registration(NamedTuple, Generic[_T]):
+    service: Any
     scope: Scope
-    builder: Callable[[], Any]
-    needs: Any
-    args: list[Any]
+    builder: Callable[[], _T]
+    needs: dict[str, Any]
+    args: dict[str, Any]
     cache: bool
 
 
@@ -183,7 +178,7 @@ class _Empty:
 empty = _Empty()
 
 
-def _match_defaults(spec):
+def _match_defaults(spec: inspect.FullArgSpec) -> dict[str, Any]:
     """Matches args with their defaults in the result of getfullargspec.
 
     inspect.getfullargspec returns a complex object that includes the defaults
@@ -200,7 +195,7 @@ def _match_defaults(spec):
         offset = len(spec.args) - len(spec.defaults)
         defaults = ([None] * offset) + list(spec.defaults)
 
-        ns = {key: value for key, value in zip(spec.args, defaults) if value is not None}
+        ns = {key: value for key, value in zip(spec.args, defaults, strict=True) if value is not None}
 
     if spec.kwonlydefaults is not None:
         # defaults for kwargs are in a dict, so we just update the result dict.
@@ -210,20 +205,22 @@ def _match_defaults(spec):
 
 
 class _Registry:
-    def __init__(self, parent=None):
+    def __init__(self, parent: _Registry | None = None) -> None:
         if not parent:
             self.__registrations = RegistrationScope()
         else:
             self.__registrations = parent.__registrations.child()
-        self._localns = {}
+        self._localns: dict[str, Any] = {}
 
-    def _get_needs_for_ctor(self, cls):
+    def _get_needs_for_ctor(self, cls: type[Any]) -> dict[str, Any]:
         try:
             return get_type_hints(cls.__init__, None, self._localns)
         except NameError as e:
             raise InvalidForwardReferenceError(str(e)) from e
 
-    def register_service_and_impl(self, service, scope, impl, resolve_args, cache=True):
+    def register_service_and_impl(
+        self, service: Any, scope: Scope, impl: Any, resolve_args: dict[str, Any], cache: bool = True
+    ) -> None:
         """Registers a concrete implementation of an abstract service.
 
         Examples:
@@ -259,7 +256,7 @@ class _Registry:
             ),
         )
 
-    def register_service_and_instance(self, service, instance):
+    def register_service_and_instance(self, service: type[_T], instance: _T) -> None:
         """Register a singleton instance to implement a service.
 
         Examples:
@@ -290,7 +287,9 @@ class _Registry:
             _Registration(service, Scope.singleton, lambda: instance, {}, {}, True),
         )
 
-    def register_concrete_service(self, service, scope, resolve_args=None, cache=True):
+    def register_concrete_service(
+        self, service: type[Any], scope: Scope, resolve_args: dict[str, Any] | None = None, cache: bool = True
+    ) -> None:
         """Register a service as its own implementation.
 
         Examples:
@@ -307,7 +306,7 @@ class _Registry:
             >>> container.register(FileReader)
             <punq.Container object at 0x...>
         """
-        if not inspect.isclass(service):
+        if not isinstance(service, type):
             raise InvalidSelfRegistrationError(service)
         self.__registrations.append(
             service,
@@ -321,7 +320,7 @@ class _Registry:
             ),
         )
 
-    def build_context(self, key, existing=None):
+    def build_context(self, key: Any, existing: _ResolutionContext | None = None) -> _ResolutionContext:
         if existing is None:
             return _ResolutionContext(key, self.__registrations.get(key))
 
@@ -330,7 +329,7 @@ class _Registry:
 
         return existing
 
-    def _update_localns(self, service):
+    def _update_localns(self, service: Any) -> None:
         if isinstance(service, type):
             self._localns[service.__name__] = service
         else:
@@ -338,68 +337,71 @@ class _Registry:
 
     def register(
         self,
-        service,
-        factory=empty,
-        instance=empty,
-        scope=Scope.transient,
-        cache=True,
-        **kwargs,
-    ):
-        resolve_args = kwargs or {}
-
+        service: Any,
+        factory: Any | _Empty = empty,
+        instance: Any | _Empty = empty,
+        scope: Scope = Scope.transient,
+        cache: bool = True,
+        **kwargs: Any,
+    ) -> None:
         if instance is not empty:
             self.register_service_and_instance(service, instance)
         elif factory is empty:
-            self.register_concrete_service(service, scope, resolve_args, cache)
+            self.register_concrete_service(service, scope, kwargs, cache)
         elif callable(factory):
-            self.register_service_and_impl(service, scope, factory, resolve_args, cache)
+            self.register_service_and_impl(service, scope, factory, kwargs, cache)
         else:
             raise InvalidFactoryError(service, factory)
 
         self._update_localns(service)
-        ensure_forward_ref(self, service, factory, instance, **kwargs)
+        self._ensure_forward_ref(service, factory, instance, **kwargs)
+
+    def _ensure_forward_ref(self, service: Any, factory: Any, instance: Any, **kwargs: Any) -> None:
+        if isinstance(service, str):
+            self.register(ForwardRef(service), factory, instance, **kwargs)
 
 
 class _ResolutionTarget:
-    def __init__(self, key, impls):
+    def __init__(self, key: Any, impls: list[_Registration[Any]]) -> None:
         self.service = key
         self.impls = impls
         self.cache = True
 
-    def is_generic_list(self):
-        return is_generic_list(self.service)
+    def is_generic_list(self) -> bool:
+        return get_origin(self.service) is list
 
     @property
-    def generic_parameter(self):
+    def generic_parameter(self) -> Any:
         return self.service.__args__[0]
 
-    def next_impl(self):
+    def next_impl(self) -> _Registration[Any] | None:
         if len(self.impls) > 0:
             impl = self.impls.pop()
             if not impl.cache:
                 self.impls.append(impl)
             return impl
+        return None
 
 
 class _ResolutionContext:
-    def __init__(self, key, impls):
+    def __init__(self, key: Any, impls: list[_Registration[Any]]) -> None:
         self.targets = {key: _ResolutionTarget(key, impls)}
-        self.cache = {}
+        self.cache: dict[Any, Any] = {}
         self.service = key
 
-    def target(self, key):
+    def target(self, key: Any) -> Any:
         return self.targets.get(key)
 
-    def has_cached(self, key):
+    def has_cached(self, key: Any) -> bool:
         return key in self.cache
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Any) -> Any | None:
         return self.cache.get(key)
 
-    def __setitem__(self, key, instance):
+    def __setitem__(self, key: Any, instance: Any) -> None:
         self.cache[key] = instance
 
-    def all_registrations(self, service):
+    def all_registrations(self, service: Any) -> list[_Registration[Any]]:
         return self.targets[service].impls
 
 
@@ -410,21 +412,48 @@ class Container:
     will only need to interact with this class.
     """
 
-    def __init__(self, registrations=None, auto_register=False):
+    def __init__(self, registrations: _Registry | None = None, auto_register: bool = False) -> None:
         self.registrations = _Registry(registrations)
         self.register(Container, instance=self)
-        self._singletons = {}
+        self._singletons: dict[Any, Any] = {}
         self._auto_register = auto_register
 
+    @overload
     def register(
         self,
-        service,
-        factory=empty,
-        instance=empty,
-        scope=Scope.transient,
-        cache=True,
-        **kwargs,
-    ):
+        service: type[Any],
+        scope: Scope = Scope.transient,
+        cache: bool = True,
+        **kwargs: Any,
+    ) -> Self: ...
+
+    @overload
+    def register(
+        self,
+        service: Any,
+        *,
+        instance: Any,
+    ) -> Self: ...
+
+    @overload
+    def register(
+        self,
+        service: Any,
+        factory: Any,
+        scope: Scope = Scope.transient,
+        cache: bool = True,
+        **kwargs: Any,
+    ) -> Self: ...
+
+    def register(  # type: ignore[misc]
+        self,
+        service: Any,
+        factory: Any | _Empty = empty,
+        instance: Any | _Empty = empty,
+        scope: Scope = Scope.transient,
+        cache: bool = True,
+        **kwargs: Any,
+    ) -> Self:
         """Register a dependency into the container.
 
         Each registration in Punq has a "service", which is the key used for
@@ -457,7 +486,7 @@ class Container:
             >>> assert container.resolve(DataAccessLayer) is dal
 
             If we need to register a dependency, but we don't need to
-                abstract it, we can register it as concrete.
+            abstract it, we can register it as concrete.
 
             >>> class FileReader:
             ...     def read (self):
@@ -475,7 +504,7 @@ class Container:
             ...     def send(self, msg):
             ...         pass
             ...
-            >>> class SmtpEmailSender (EmailSender):
+            >>> class SmtpEmailSender(EmailSender):
             ...     def send(self, msg):
             ...         print("Sending message via smtp")
             ...
@@ -488,7 +517,7 @@ class Container:
         self.registrations.register(service, factory, instance, scope, cache, **kwargs)
         return self
 
-    def resolve_all(self, service, **kwargs):
+    def resolve_all(self, service: type[_T], **kwargs: Any) -> list[_T]:
         """Return all registrations for a given service.
 
         Some patterns require us to use multiple implementations of an
@@ -524,7 +553,9 @@ class Container:
 
         return [self._build_impl(x, kwargs, context) for x in context.all_registrations(service)]
 
-    def _build_impl(self, registration, resolution_args, context):
+    def _build_impl(
+        self, registration: _Registration[_T], resolution_args: dict[str, Any], context: _ResolutionContext
+    ) -> _T:
         """Instantiate the registered service."""
         spec = inspect.getfullargspec(registration.builder)
         target_args = spec.args + spec.kwonlyargs
@@ -552,12 +583,14 @@ class Container:
 
         return result
 
-    def _should_auto_register(self, service_key, registration):
+    def _should_auto_register(self, service_key: Any, registration: _Registration[Any] | None) -> bool:
         if self._auto_register is False:
             return False
-        return registration is None and inspect.isclass(service_key)
+        return registration is None and isinstance(service_key, type)
 
-    def _resolve_impl(self, service_key, kwargs, context, default=None):
+    def _resolve_impl(
+        self, service_key: Any, kwargs: dict[str, Any], context: _ResolutionContext | None, default: Any | None = None
+    ) -> Any:
         context = self.registrations.build_context(service_key, context)
 
         if service_key in self._singletons:
@@ -585,13 +618,19 @@ class Container:
 
         return self._build_impl(registration, kwargs, context)
 
-    def resolve(self, service_key, **kwargs):
+    @overload
+    def resolve(self, service_key: type[_T], **kwargs: Any) -> _T: ...
+
+    @overload
+    def resolve(self, service_key: Any, **kwargs: Any) -> Any: ...
+
+    def resolve(self, service_key: Any, **kwargs: Any) -> Any:
         """Build and return an instance of a registered service."""
         context = self.registrations.build_context(service_key)
 
         return self._resolve_impl(service_key, kwargs, context)
 
-    def instantiate(self, service_key, **kwargs):
+    def instantiate(self, service_key: type[_T], **kwargs: Any) -> _T:
         """Instantiate an unregistered service."""
         registration = _Registration(
             service_key,
@@ -606,7 +645,7 @@ class Container:
 
         return self._build_impl(registration, kwargs, context)
 
-    def child(self):
+    def child(self) -> Self:
         """Create a new container that inherits configuration from this one.
 
         You may need to change dependencies for a particular scope of your
@@ -621,14 +660,16 @@ class Container:
             the RequestData.
             The order of registration is unimportant.
 
-            >>> from collections import namedtuple
+            >>> from typing import NamedTuple
 
-            >>> RequestData = namedtuple('RequestData', 'user_id is_admin')
+            >>> class RequestData(NamedTuple):
+            ...     user_id: int
+            ...     is_admin: bool
 
             >>> class RequestHandler:
             ...
             ...     def __init__(self, state: RequestData):
-            ...         self.state= state
+            ...         self.state = state
             ...
             ...     def handle(self) -> None:
             ...         print(self.state)
@@ -654,4 +695,4 @@ class Container:
             >>> second_request_container.resolve(RequestHandler).handle()
             RequestData(user_id=789, is_admin=False)
         """
-        return Container(self.registrations, auto_register=self._auto_register)
+        return type(self)(self.registrations, auto_register=self._auto_register)
