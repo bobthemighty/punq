@@ -389,8 +389,8 @@ class _ResolutionContext:
         self.cache: dict[Any, Any] = {}
         self.service = key
 
-    def target(self, key: Any) -> Any:
-        return self.targets.get(key)
+    def target(self, key: Any) -> _ResolutionTarget:
+        return self.targets[key]
 
     def has_cached(self, key: Any) -> bool:
         return key in self.cache
@@ -614,7 +614,8 @@ class Container:
             return self._resolve_impl(service_key, kwargs, None, default)
 
         if registration is None:
-            raise MissingDependencyError("Failed to resolve implementation for " + str(service_key))
+            msg = f"Failed to resolve implementation for {service_key!s}"
+            raise MissingDependencyError(msg)
 
         return self._build_impl(registration, kwargs, context)
 

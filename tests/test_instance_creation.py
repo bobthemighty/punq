@@ -236,5 +236,5 @@ def test_can_use_a_string_key():
 def test_cant_register_non_type():
     container = Container()
 
-    with pytest.raises(InvalidRegistrationError, match='own implementation'):
-        container.register('dep')
+    with pytest.raises(InvalidRegistrationError, match="own implementation"):
+        container.register("dep")
