@@ -24,9 +24,9 @@ from collections import defaultdict
 from collections.abc import Callable
 from enum import Enum, unique
 from importlib.metadata import PackageNotFoundError, version
-from typing import Any, ForwardRef, Generic, NamedTuple, TypeVar, get_origin, overload
+from typing import Any, ForwardRef, Generic, TypeVar, get_origin, overload
 
-from typing_extensions import Self, get_type_hints
+from typing_extensions import NamedTuple, Self, get_type_hints
 
 with contextlib.suppress(PackageNotFoundError):
     __version__ = version(__name__)

@@ -47,6 +47,7 @@ assert_type(container.instantiate(Impl, args=None, kwargs=None), Impl)
 # Child
 # -----
 
+
 class SubContainer(Container): ...
 
 

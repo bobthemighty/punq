@@ -21,6 +21,11 @@ def test_can_create_instance_with_no_dependencies():
     expect(container.resolve(MessageWriter)).to(be_a(StdoutMessageWriter))
 
 
+def test_can_create_instance_with_auto_register():
+    container = Container(auto_register=True)
+    expect(container.resolve(MessageWriter)).to(be_a(MessageWriter))
+
+
 def test_dependencies_are_injected():
     container = Container()
     container.register(MessageWriter, StdoutMessageWriter)
@@ -226,3 +231,10 @@ def test_can_use_a_string_key():
     container = Container()
     container.register("foo", instance=1)
     assert container.resolve("foo") == 1
+
+
+def test_cant_register_non_type():
+    container = Container()
+
+    with pytest.raises(InvalidRegistrationError, match='own implementation'):
+        container.register('dep')
