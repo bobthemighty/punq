@@ -143,6 +143,12 @@ class RegistrationScope:
             self.parent.__get(key, result)
         for elem in self.entries[key]:
             result.append(elem)
+        # The second option, it might be a forward ref with a string key,
+        # needed for 3.14+ support:
+        if isinstance(key, ForwardRef):
+            for entry in self.entries:
+                if isinstance(entry, ForwardRef) and entry.__forward_arg__ == key.__forward_arg__:
+                    result.extend(self.entries[entry])
         return result
 
     def get(self, key: Any) -> list[Any]:
@@ -604,6 +610,7 @@ class Container:
         if target.is_generic_list():
             return self.resolve_all(target.generic_parameter)
 
+        print(target.impls)
         registration = target.next_impl()
 
         if registration is None and default is not None:

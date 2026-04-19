@@ -58,7 +58,7 @@ def test_forward_references_can_be_registered_as_strings():
     resolve a forward reference with an arbitrary string.
     """
     container = punq.Container()
-    container.register("Dependency", DataAccessLayer, owner=Client)
+    container.register("Dependency", DataAccessLayer)
     container.register(Client)
 
     instance = container.resolve(Client)
