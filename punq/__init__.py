@@ -610,7 +610,6 @@ class Container:
         if target.is_generic_list():
             return self.resolve_all(target.generic_parameter)
 
-        print(target.impls)
         registration = target.next_impl()
 
         if registration is None and default is not None:
