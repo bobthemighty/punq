@@ -1,21 +1,28 @@
 [project]
 name = "punq"
 version = "0.7.1"
-description = "An IOC Container for Python 3.8+"
-authors = [{ name = "Bob Gregory", email = "bob@codefiend.co.uk" }]
+description = "An IOC Container for Python 3.10+"
+authors = [
+  { name = "Bob Gregory", email = "bob@codefiend.co.uk" },
+  { name = "Nikita Sobolev", email = "mail@sobolevn.me" },
+]
 readme = "README.md"
 keywords = ['python']
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4.0"
 classifiers = [
     "Intended Audience :: Developers",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "typing-extensions>=4",
 ]
 
 [project.urls]
@@ -23,8 +30,9 @@ Homepage = "https://bobthemighty.github.io/punq/"
 Repository = "https://github.com/bobthemighty/punq"
 Documentation = "https://bobthemighty.github.io/punq/"
 
-[tool.uv]
-dev-dependencies = [
+
+[dependency-groups]
+dev = [
     "pytest>=7.2.0",
     "pre-commit>=2.20.0",
     "tox-uv>=1.11.3",
@@ -39,6 +47,7 @@ dev-dependencies = [
     "attrs>=24.2.0",
     "mkdocs-include-markdown-plugin>=6.2.2",
     "xdoctest>=1.2.0",
+    "mypy>=1.20.1",
 ]
 
 [build-system]
@@ -46,20 +55,13 @@ requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.mypy]
-files = ["punq"]
-disallow_untyped_defs = true
-disallow_any_unimported = true
-no_implicit_optional = true
-check_untyped_defs = true
-warn_return_any = true
-warn_unused_ignores = true
-show_error_codes = true
+strict = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 120
 fix = true
 
@@ -111,6 +113,7 @@ preview = true
 
 [tool.coverage.report]
 skip_empty = true
+show_missing = true
 
 [tool.coverage.run]
 branch = true

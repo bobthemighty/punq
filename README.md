@@ -24,7 +24,7 @@ Punq is available on the [cheese shop][2]
 pip install punq
 ```
 
-Documentation is available on [Github pages][3].
+Documentation is available on [GitHub pages][3].
 
 ## Quick Start
 
@@ -52,16 +52,16 @@ Usually, though, we want to register some object that implements a useful servic
 
 ```python
 class ConfigReader:
-    def get_config(self):
+    def get_config(self) -> dict[str, str]:
         pass
 
 class EnvironmentConfigReader(ConfigReader):
-    def get_config(self):
+    def get_config(self) -> dict[str, str]:
         return {
-        "logging": {
-            "level": os.env.get("LOGGING_LEVEL", "debug")
-        },
-        "greeting": os.env.get("GREETING", "Hello world")
+            "logging": {
+                "level": os.env.get("LOGGING_LEVEL", "debug"),
+            },
+            "greeting": os.env.get("GREETING", "Hello world"),
         }
 
 container.register(ConfigReader, EnvironmentConfigReader)
@@ -77,15 +77,15 @@ If our application's dependencies have their _own_ dependencies, Punq will injec
 
 ```python
 class Greeter:
-    def greet(self):
+    def greet(self) -> None:
         pass
 
 
 class ConsoleGreeter(Greeter):
-    def __init__(self, config_reader: ConfigReader):
+    def __init__(self, config_reader: ConfigReader) -> None:
         self.config = config_reader.get_config()
 
-    def greet(self):
+    def greet(self) -> None:
         print(self.config['greeting'])
 
 
@@ -98,10 +98,10 @@ If you just want to resolve an object without having any base class, that's okay
 
 ```python
 class Greeter:
-    def __init__(self, config_reader: ConfigReader):
+    def __init__(self, config_reader: ConfigReader) -> None:
         self.config = config_reader.get_config()
 
-    def greet(self):
+    def greet(self) -> None:
         print(self.config['greeting'])
 
 container.register(Greeter)
@@ -112,12 +112,12 @@ And if you need to have a singleton object for some reason, we can tell punq to 
 
 ```python
 class FileWritingGreeter:
-    def __init__(self, path, greeting):
+    def __init__(self, path: str, greeting: str) -> None:
         self.path = path
         self.message = greeting
         self.file = open(self.path, 'w')
 
-    def greet(self):
+    def greet(self) -> None:
         self.file.write(self.message)
 
 
@@ -130,7 +130,6 @@ You might not know all of your arguments at registration time, but you can provi
 ```python
 container.register(Greeter, FileWritingGreeter)
 greeter = container.resolve(Greeter, path="/tmp/foo", greeting="Hello world")
-
 ```
 
 Conversely, you might want to provide arguments at registration time, without adding them to the container:
@@ -146,6 +145,6 @@ container.register(Greeter, FileWritingGreeter, path="/tmp/foo", greeting="Hello
 
 <!-- end_quick_start -->
 
-Fuller documentation is available on [Github pages][3]
+Fuller documentation is available on [GitHub pages][3]
 
-Github workflows, nox configuration, and linting gratefully stolen from [CookieCutter UV][4]
+GitHub workflows, nox configuration, and linting gratefully stolen from [CookieCutter UV][4]

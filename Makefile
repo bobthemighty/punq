@@ -19,6 +19,12 @@ fmt:
 	@uv run ruff check --fix
 	@uv run ruff format
 
+.PHONY: type-check
+type-check: ## Type check the code with mypy
+	@echo "🚀 Type checking code: Running mypy"
+	@uv run mypy punq
+	@uv run mypy typesafety
+
 .PHONY: test
 test: ## Test the code with pytest
 	@echo "🚀 Testing code: Running pytest"
