@@ -2,7 +2,10 @@
 name = "punq"
 version = "0.7.1"
 description = "An IOC Container for Python 3.10+"
-authors = [{ name = "Bob Gregory", email = "bob@codefiend.co.uk" }]
+authors = [
+  { name = "Bob Gregory", email = "bob@codefiend.co.uk" },
+  { name = "Nikita Sobolev", email = "mail@sobolevn.me" },
+]
 readme = "README.md"
 keywords = ['python']
 requires-python = ">=3.10,<4.0"
