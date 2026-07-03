@@ -194,7 +194,7 @@ def _match_defaults(spec: inspect.FullArgSpec) -> dict[str, Any]:
     These defaults are passed to _resolve_impl when building a needed dependency
     and used when a registration is missing.
     """
-    ns = {}
+    ns: dict[str, Any] = {}
     if spec.defaults is not None:
         # Defaults for args are just a tuple. We match args with their defaults
         # by position, starting at the first defaulted arg
@@ -313,7 +313,7 @@ class _Registry:
             >>> container.register(FileReader)
             <punq.Container object at 0x...>
         """
-        if not isinstance(service, type):
+        if not isinstance(service, type):  # pyright: ignore[reportUnnecessaryIsInstance]
             raise InvalidSelfRegistrationError(service)
         self.__registrations.append(
             service,
@@ -426,7 +426,7 @@ class Container:
         self._auto_register = auto_register
 
     @overload
-    def register(
+    def register(  # pyrefly: ignore[inconsistent-overload]
         self,
         service: type[Any],
         scope: Scope = Scope.transient,
@@ -443,7 +443,7 @@ class Container:
     ) -> Self: ...
 
     @overload
-    def register(
+    def register(  # pyrefly: ignore[inconsistent-overload]
         self,
         service: Any,
         factory: Any,
@@ -452,7 +452,7 @@ class Container:
         **kwargs: Any,
     ) -> Self: ...
 
-    def register(  # type: ignore[misc]
+    def register(  # type: ignore[misc]  # pyright: ignore[reportInconsistentOverload]
         self,
         service: Any,
         factory: Any | _Empty = empty,
