@@ -14,7 +14,7 @@ check: ## Run code quality tools.
 	@uv run deptry .
 
 .PHONY: fmt
-fmt:
+fmt: ## Format code
 	@echo "Format and fix"
 	@uv run ruff check --fix
 	@uv run ruff format
