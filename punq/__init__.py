@@ -199,12 +199,13 @@ def _match_defaults(spec: inspect.FullArgSpec) -> dict[str, Any]:
         # Defaults for args are just a tuple. We match args with their defaults
         # by position, starting at the first defaulted arg
         offset = len(spec.args) - len(spec.defaults)
-        defaults = ([None] * offset) + list(spec.defaults)
+        defaults = ([empty] * offset) + list(spec.defaults)
 
-        ns = {key: value for key, value in zip(spec.args, defaults, strict=True) if value is not None}
+        # filter only args with default value presented
+        ns = {key: value for key, value in zip(spec.args, defaults, strict=True) if value is not empty}
 
     if spec.kwonlydefaults is not None:
-        # defaults for kwargs are in a dict, so we just update the result dict.
+        # defaults for kwargs are in a dict, so we just update the result dict
         ns.update(spec.kwonlydefaults)
 
     return ns
@@ -585,7 +586,7 @@ class Container:
 
         args = _match_defaults(spec)
         args.update({
-            k: self._resolve_impl(v, resolution_args, context, args.get(k))
+            k: self._resolve_impl(v, resolution_args, context, args.get(k, empty))
             for k, v in registration.needs.items()
             if k != "return" and k not in registration.args and k not in resolution_args
         })
@@ -612,7 +613,7 @@ class Container:
         return registration is None and isinstance(service_key, type)
 
     def _resolve_impl(
-        self, service_key: Any, kwargs: dict[str, Any], context: _ResolutionContext | None, default: Any | None = None
+        self, service_key: Any, kwargs: dict[str, Any], context: _ResolutionContext | None, default: Any = empty
     ) -> Any:
         context = self.registrations.build_context(service_key, context)
 
@@ -629,7 +630,7 @@ class Container:
 
         registration = target.next_impl()
 
-        if registration is None and default is not None:
+        if registration is None and default is not empty:
             return default
 
         if self._should_auto_register(service_key, registration):

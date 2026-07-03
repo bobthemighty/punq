@@ -8,9 +8,10 @@ class Dep:
 
 
 class Client:
-    def __init__(self, a: Dep, b: int = 10):
+    def __init__(self, a: Dep, b: int = 10, c: str | None = None):
         self.a = a
         self.b = b
+        self.c = c
 
 
 def test_can_create_instance_with_defaulted_kwarg():
@@ -20,6 +21,7 @@ def test_can_create_instance_with_defaulted_kwarg():
 
     client = container.resolve(Client)
     expect(client.b).to(equal(10))
+    expect(client.c).to(equal(None))
 
 
 def test_defaults_are_superseded_by_registrations():
@@ -30,6 +32,7 @@ def test_defaults_are_superseded_by_registrations():
 
     client = container.resolve(Client)
     expect(client.b).to(equal(3))
+    expect(client.c).to(equal(None))
 
 
 def test_defaults_are_superseded_by_context():
@@ -37,5 +40,6 @@ def test_defaults_are_superseded_by_context():
     container.register(Dep)
     container.register(Client)
 
-    client = container.resolve(Client, b=5)
+    client = container.resolve(Client, b=5, c="win")
     expect(client.b).to(equal(5))
+    expect(client.c).to(equal("win"))
