@@ -48,6 +48,8 @@ dev = [
     "attrs>=24.2.0",
     "mkdocs-include-markdown-plugin>=7.3.0",
     "mypy>=1.20.1",
+    "pyright>=1.1.411",
+    "pyrefly>=1.1.1",
 ]
 
 [build-system]
@@ -55,7 +57,46 @@ requires = ["setuptools>=82.0.1"]
 build-backend = "setuptools.build_meta"
 
 [tool.mypy]
+extra_checks = true
 strict = true
+strict_equality_for_none = true
+warn_unreachable = true
+
+enable_error_code = [
+  'deprecated',
+  'exhaustive-match',
+  'explicit-override',
+  'ignore-without-code',
+  'possibly-undefined',
+  'redundant-expr',
+  'redundant-self',
+  'truthy-bool',
+  'truthy-iterable',
+  'unimported-reveal',
+  'unused-awaitable',
+]
+
+[tool.pyright]
+include = ["punq/", "tests/typing/"]
+# Strict mode:
+typeCheckingMode = "strict"
+reportImplicitStringConcatenation = "error"
+reportUninitializedInstanceVariable = "error"
+reportUnnecessaryTypeIgnoreComment = "error"
+# Don't use '# type: ignore' to suppress with pyright:
+enableTypeIgnoreComments = false
+# Don't report unused variables and classes:
+reportUnusedVariable = false
+reportUnusedClass = false
+reportPrivateUsage = false
+
+[tool.pyrefly]
+project-includes = ["punq/", "tests/typing/"]
+# Strict mode:
+preset = 'strict'
+min-severity = 'warn'
+# Don't use '# type: ignore' to suppress with pyright:
+enabled-ignores = ["pyrefly"]
 
 [tool.pytest.ini_options]
 xfail_strict = true

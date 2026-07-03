@@ -24,6 +24,8 @@ type-check: ## Type check the code with mypy
 	@echo "🚀 Type checking code: Running mypy"
 	@uv run mypy punq
 	@uv run mypy typesafety
+	@uv run pyright
+	@uv run pyrefly check
 
 .PHONY: test
 test: ## Test the code with pytest

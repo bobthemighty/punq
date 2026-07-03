@@ -14,6 +14,7 @@ Inspired by [Funq][1], Punq is a dependency injection library you can understand
 - No global state
 - No decorators
 - No weird syntax applied to arguments
+- Supports type checking with strict modes of `mypy`, `pyright`, and `pyrefly`
 - Small and simple code base with 100% test coverage and developer-friendly comments.
 
 ## Installation
