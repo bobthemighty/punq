@@ -990,7 +990,7 @@ dev = [
     { name = "mkdocs", specifier = ">=1.4.2" },
     { name = "mkdocs-include-markdown-plugin", specifier = ">=6.2.2" },
     { name = "mkdocs-material", specifier = ">=8.5.10" },
-    { name = "mkdocstrings", extras = ["python"], specifier = ">=0.26.1" },
+    { name = "mkdocstrings", extras = ["python"], specifier = ">=1.0.4" },
     { name = "mypy", specifier = ">=1.20.1" },
     { name = "pre-commit", specifier = ">=2.20.0" },
     { name = "pytest", specifier = ">=7.2.0" },
