@@ -512,13 +512,29 @@ class Container:
             ...
             >>> class SmtpEmailSender(EmailSender):
             ...     def send(self, msg):
-            ...         print("Sending message via smtp")
+            ...         print("Sending message via smtp:", msg)
             ...
             >>> container.register(EmailSender, SmtpEmailSender)
             <punq.Container object at 0x...>
             >>> instance = container.resolve(EmailSender)
             >>> instance.send("beep")
-            Sending message via smtp
+            Sending message via smtp: beep
+
+            You can also instantiate unregistered services:
+
+            >>> class BirthdayNotification:
+            ...      def __init__(self, sender: EmailSender) -> None:
+            ...          self.sender = sender
+            ...      def notify_user(self, user: str) -> None:
+            ...          self.sender.send(f'Happy birthday, {user}!')
+
+            >>> instance = container.instantiate(BirthdayNotification)
+            >>> instance
+            <punq.BirthdayNotification object at 0x...>
+
+            >>> instance.notify_user('sobolevn')
+            Sending message via smtp: Happy birthday, sobolevn!
+
         """
         self.registrations.register(service, factory, instance, scope, cache, **kwargs)
         return self
@@ -563,6 +579,7 @@ class Container:
         self, registration: _Registration[_T], resolution_args: dict[str, Any], context: _ResolutionContext
     ) -> _T:
         """Instantiate the registered service."""
+        # TODO: replace with `inspect.signature`:
         spec = inspect.getfullargspec(registration.builder)
         target_args = spec.args + spec.kwonlyargs
 

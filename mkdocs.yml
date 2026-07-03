@@ -1,7 +1,7 @@
 site_name: punq
 repo_url: https://github.com/bobthemighty/punq
 site_url: https://bobthemighty.github.io/punq
-site_description: An IOC Container for Python 3.8+
+site_description: An IOC Container for Python 3.10+
 site_author: Bob Gregory
 edit_uri: edit/main/docs/
 repo_name: bobthemighty/punq
