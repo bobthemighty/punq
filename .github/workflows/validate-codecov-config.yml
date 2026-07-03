@@ -2,9 +2,18 @@ name: validate-codecov-config
 
 on:
   pull_request:
-    paths: [codecov.yaml]
+    paths:
+      - codecov.yaml
+      - .github/workflows/validate-codecov-config.yml
   push:
     branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   validate-codecov-config:
