@@ -38,6 +38,7 @@ dev = [
     "pre-commit>=4.6.0",
     "deptry>=0.25.0",
     "pytest-cov>=4.0.0",
+    "covdefaults>=2.3.0",
     "ruff>=0.15.20",
     "mkdocs>=1.4.2",
     "mkdocs-material>=8.5.10",
@@ -58,7 +59,17 @@ build-backend = "setuptools.build_meta"
 strict = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+xfail_strict = true
+
+addopts = [
+  "--strict-config",
+  "--strict-markers",
+  "--doctest-modules",
+  "--doctest-glob=*.rst",
+  "--doctest-glob=README.md",
+  # Ignores typesafety tests:
+  "--ignore=typesafety",
+]
 
 [tool.ruff]
 target-version = "py310"
@@ -118,6 +129,7 @@ show_missing = true
 [tool.coverage.run]
 branch = true
 source = ["punq"]
+plugins = ["covdefaults"]
 
 [tool.setuptools.packages.find]
 exclude = ['site']
