@@ -1,15 +1,16 @@
 Changelog
 =========
 
-
-WIP
----
+`0.8.0`_ 2026-07-03
+-------------------
   Dropped Python3.8 support.
   Dropped Python3.9 support.
   Added Python3.14 support.
+  Added Python3.15 support.
   Added type annotations and ``py.typed`` file.
   Now ``Container.child`` returns ``Self`` type, not ``Container`` type.
-  Changes how ``typing.ForwardRef`` instances are compared: first we compare them
+  Fixed how ``None`` defaults worked when comparing signatures.
+  Changed how ``typing.ForwardRef`` instances are compared: first we compare them
   by hash, next by ``__forward_arg__``.
 
 `0.7.0`_ 2023-09-11
@@ -82,5 +83,7 @@ Feature
 .. _0.4.0: https://github.com/bobthemighty/punq/compare/v0.3.0...v0.4.0
 .. _0.4.1: https://github.com/bobthemighty/punq/compare/v0.4.0...v0.4.1
 .. _0.6.0: https://github.com/bobthemighty/punq/compare/v0.4.1...v0.6.0
+.. _0.7.0: https://github.com/bobthemighty/punq/compare/v0.6.0...v0.7.0
+.. _0.8.0: https://github.com/bobthemighty/punq/compare/v0.7.0...v0.8.0
 .. _Thielen B: https://github.com/FourSpotProject
 .. _jbcpollak: https://github.com/jbcpollak
