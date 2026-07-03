@@ -1027,7 +1027,6 @@ dev = [
     { name = "pytest-cov" },
     { name = "ruff" },
     { name = "sqlalchemy" },
-    { name = "xdoctest" },
 ]
 
 [package.metadata]
@@ -1049,7 +1048,6 @@ dev = [
     { name = "pytest-cov", specifier = ">=4.0.0" },
     { name = "ruff", specifier = ">=0.15.20" },
     { name = "sqlalchemy", specifier = ">=2.0.36" },
-    { name = "xdoctest", specifier = ">=1.2.0" },
 ]
 
 [[package]]
@@ -1453,13 +1451,4 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/11/15/dc61746d8c0852f6d711ad09c774b63cf7c8211aa49e30871ac3d342b7e2/wcmatch-10.2.1.tar.gz", hash = "sha256:ecac70a5c70e62ba854b78318d3a1408e8651f8f1c96e5837743b71aa6a4fb92", size = 132497, upload-time = "2026-07-02T17:21:48.484Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/82/ba/20b48eedeab5316bf9a502bb9eb7e3b1588bd61d0f565822fefa8f06e10b/wcmatch-10.2.1-py3-none-any.whl", hash = "sha256:2d775395b93f233af66690f62cb9d52b084ec159a31cc4084f4069d72f437acd", size = 39763, upload-time = "2026-07-02T17:21:47.134Z" },
-]
-
-[[package]]
-name = "xdoctest"
-version = "1.3.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/3f/df/1b5751e3546967a4884cff6ea743b1e457d3f7c94fc35913f149a85734fc/xdoctest-1.3.2.tar.gz", hash = "sha256:bf6078c4fc0d60aafd8753fccdc435c95f26a640508e606d188d96f48359f0aa", size = 209923, upload-time = "2026-03-27T01:13:25.275Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/29/1d/6b9cf46122f2f07eab95c4af29ab5e29bd6674147a0b1e9a6d3929870af1/xdoctest-1.3.2-py3-none-any.whl", hash = "sha256:052118c8efb2b4cfb54485d328915b9e7b44da37c64b0998ca6aa21193dcb601", size = 146469, upload-time = "2026-03-27T01:13:23.417Z" },
 ]

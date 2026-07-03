@@ -47,7 +47,6 @@ dev = [
     "sqlalchemy>=2.0.36",
     "attrs>=24.2.0",
     "mkdocs-include-markdown-plugin>=7.3.0",
-    "xdoctest>=1.2.0",
     "mypy>=1.20.1",
 ]
 
