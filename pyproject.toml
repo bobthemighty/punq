@@ -1,6 +1,6 @@
 [project]
 name = "punq"
-version = "0.7.1"
+version = "0.8.0"
 description = "An IOC Container for Python 3.10+"
 authors = [
   { name = "Bob Gregory", email = "bob@codefiend.co.uk" },
