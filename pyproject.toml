@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "typing-extensions>=4",
+    "typing-extensions>=4.16.0",
 ]
 
 [project.urls]
