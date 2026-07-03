@@ -34,7 +34,7 @@ Documentation = "https://bobthemighty.github.io/punq/"
 [dependency-groups]
 dev = [
     "pytest>=7.2.0",
-    "pre-commit>=2.20.0",
+    "pre-commit>=4.6.0",
     "tox-uv>=1.11.3",
     "deptry>=0.20.0",
     "pytest-cov>=4.0.0",
