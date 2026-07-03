@@ -42,3 +42,24 @@ def test_that_repeated_resolutions_are_cached():
     instance = container.resolve(Root)
 
     assert instance.a.dep is instance.b.dep
+
+
+def test_that_repeated_resolutions_are_not_cached_if_cache_is_disabled():
+    """
+    In this test we have two dependencies, each of which
+    depends on SomeVeryHeavyDep registered with cache=False.
+
+    We should get different instances of SomeVeryHeavyDep
+    for each resolution, despite being registered as transient,
+    because caching is explicitly disabled.
+    """
+    container = punq.Container()
+
+    container.register(SomeVeryHeavyDep, scope=punq.Scope.transient, cache=False)
+    container.register(SubSystemA)
+    container.register(SubSystemB)
+    container.register(Root)
+
+    instance = container.resolve(Root)
+
+    assert instance.a.dep is not instance.b.dep

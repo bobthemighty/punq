@@ -14,15 +14,21 @@ check: ## Run code quality tools.
 	@uv run deptry .
 
 .PHONY: fmt
-fmt:
+fmt: ## Format code
 	@echo "Format and fix"
 	@uv run ruff check --fix
 	@uv run ruff format
 
+.PHONY: type-check
+type-check: ## Type check the code with mypy
+	@echo "🚀 Type checking code: Running mypy"
+	@uv run mypy punq
+	@uv run mypy typesafety
+
 .PHONY: test
 test: ## Test the code with pytest
 	@echo "🚀 Testing code: Running pytest"
-	@uv run python -m pytest --cov --cov-config=pyproject.toml --cov-report=xml --doctest-modules punq
+	@uv run pytest --cov --cov-config=pyproject.toml --cov-report=xml
 
 .PHONY: build
 build: clean-build ## Build wheel file
