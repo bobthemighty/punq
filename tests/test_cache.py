@@ -63,3 +63,14 @@ def test_that_repeated_resolutions_are_not_cached_if_cache_is_disabled():
     instance = container.resolve(Root)
 
     assert instance.a.dep is not instance.b.dep
+
+
+def test_singletons_are_reused_if_cache_is_disabled():
+    container = punq.Container()
+
+    container.register(SomeVeryHeavyDep, scope=punq.Scope.singleton, cache=False)
+
+    first = container.resolve(SomeVeryHeavyDep)
+    second = container.resolve(SomeVeryHeavyDep)
+
+    assert first is second
