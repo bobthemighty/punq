@@ -422,7 +422,7 @@ class Container:
     def __init__(self, registrations: _Registry | None = None, auto_register: bool = False) -> None:
         self.registrations = _Registry(registrations)
         self.register(Container, instance=self)
-        self._singletons: dict[Any, Any] = {}
+        self._singletons: dict[int, Any] = {}
         self._auto_register = auto_register
 
     @overload
@@ -600,7 +600,7 @@ class Container:
         result = registration.builder(**args)
 
         if registration.scope == Scope.singleton:
-            self._singletons[registration.service] = result
+            self._singletons[id(registration)] = result
 
         if registration.cache:
             context[registration.service] = result
@@ -616,9 +616,6 @@ class Container:
         self, service_key: Any, kwargs: dict[str, Any], context: _ResolutionContext | None, default: Any = empty
     ) -> Any:
         context = self.registrations.build_context(service_key, context)
-
-        if service_key in self._singletons:
-            return self._singletons[service_key]
 
         if context.has_cached(service_key):
             return context[service_key]
@@ -640,6 +637,13 @@ class Container:
         if registration is None:
             msg = f"Failed to resolve implementation for {service_key!s}"
             raise MissingDependencyError(msg)
+
+        singleton_key = id(registration)
+        if registration.scope == Scope.singleton and singleton_key in self._singletons:
+            result = self._singletons[singleton_key]
+            if registration.cache:
+                context[registration.service] = result
+            return result
 
         return self._build_impl(registration, kwargs, context)
 
@@ -720,4 +724,6 @@ class Container:
             >>> second_request_container.resolve(RequestHandler).handle()
             RequestData(user_id=789, is_admin=False)
         """
-        return type(self)(self.registrations, auto_register=self._auto_register)
+        child = type(self)(self.registrations, auto_register=self._auto_register)
+        child._singletons = self._singletons
+        return child

@@ -1,7 +1,7 @@
 import pytest
 from expects import be_a, expect
 
-from punq import Container, MissingDependencyError
+from punq import Container, MissingDependencyError, Scope
 from tests.test_dependencies import (
     ConnectionStringFactory,
     FancyDbMessageWriter,
@@ -105,6 +105,48 @@ def test_when_inheriting_a_singleton_instance():
 
     assert parent.resolve(MessageWriter).connection_string == "hello"
     assert child.resolve(MessageWriter).connection_string == "hello"
+
+
+def test_child_reuses_parent_singleton():
+    class Service:
+        created = False
+
+        def __init__(self):
+            if Service.created:
+                msg = "Service can only be created once"
+                raise RuntimeError(msg)
+            Service.created = True
+
+    parent = Container()
+    parent.register(Service, scope=Scope.singleton)
+    child = parent.child()
+
+    parent_instance = parent.resolve(Service)
+
+    assert child.resolve(Service) is parent_instance
+
+
+def test_child_singleton_override_is_isolated():
+    class Service:
+        pass
+
+    class ParentService(Service):
+        pass
+
+    class ChildService(Service):
+        pass
+
+    parent = Container()
+    parent.register(Service, ParentService, scope=Scope.singleton)
+    child = parent.child()
+    child.register(Service, ChildService, scope=Scope.singleton)
+
+    parent_instance = parent.resolve(Service)
+    child_instance = child.resolve(Service)
+
+    assert isinstance(parent_instance, ParentService)
+    assert isinstance(child_instance, ChildService)
+    assert parent_instance is not child_instance
 
 
 ContextBag = dict
