@@ -172,4 +172,4 @@ source = ["punq"]
 plugins = ["covdefaults"]
 
 [tool.setuptools.packages.find]
-exclude = ['site']
+include = ["punq*"]
