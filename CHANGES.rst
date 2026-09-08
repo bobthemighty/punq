@@ -1,6 +1,11 @@
 Changelog
 =========
 
+`0.9.0`_ 2026-10-08
+-------------------
+  Added real singletons support, #247.
+  Fixed `wheel` package contents, #265.
+
 `0.8.0`_ 2026-07-03
 -------------------
   Dropped Python3.8 support.
