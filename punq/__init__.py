@@ -572,9 +572,12 @@ class Container:
             ...         if authn.matches(req):
             ...             return authn.authenticate(req)
         """
+        return self._resolve_all(service, kwargs)
+
+    def _resolve_all(self, service: type[_T], resolution_args: dict[str, Any]) -> list[_T]:
         context = self.registrations.build_context(service)
 
-        return [self._build_impl(x, kwargs, context) for x in context.all_registrations(service)]
+        return [self._build_impl(x, resolution_args, context) for x in context.all_registrations(service)]
 
     def _build_impl(
         self, registration: _Registration[_T], resolution_args: dict[str, Any], context: _ResolutionContext
@@ -623,7 +626,7 @@ class Container:
         target = context.target(service_key)
 
         if target.is_generic_list():
-            return self.resolve_all(target.generic_parameter)
+            return self._resolve_all(target.generic_parameter, kwargs)
 
         registration = target.next_impl()
 
